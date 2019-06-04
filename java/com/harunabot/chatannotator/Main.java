@@ -1,6 +1,7 @@
 package com.harunabot.chatannotator;
 
 import com.harunabot.chatannotator.util.Reference;
+import com.harunabot.chatannotator.util.handlers.ChatHandler;
 import com.harunabot.chatannotator.util.handlers.RegistryHandler;
 import com.harunabot.chatannotator.proxy.CommonProxy;
 
@@ -19,25 +20,25 @@ public class Main
 	@Instance
 	public static Main instance;
 
-	@SidedProxy(clientSide = Reference.CLIENT_PROXY_CLASS, serverSide = Reference.COMMON_PROXY_CLASS)
+	@SidedProxy(clientSide = Reference.CLIENT_PROXY_CLASS, serverSide = Reference.SERVER_PROXY_CLASS)
 	public static CommonProxy proxy;
 
-	@EventHandler
+	@Mod.EventHandler
 	public static void PreInit(FMLPreInitializationEvent event)
 	{
-		RegistryHandler.preInitRegistries(event);
+		proxy.preInit(event);
 	}
 
-	@EventHandler
+	@Mod.EventHandler
 	public static void init(FMLInitializationEvent event)
 	{
-		RegistryHandler.initRegistries(event);
+		proxy.init(event);
 	}
 
-	@EventHandler
+	@Mod.EventHandler
 	public static void PostInit(FMLPostInitializationEvent event)
 	{
-		RegistryHandler.postInitRegistries(event);
+		proxy.postInit(event);
 	}
 
 }
