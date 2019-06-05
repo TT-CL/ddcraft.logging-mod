@@ -28,6 +28,7 @@ public class GuiChatWithAnnotation extends GuiChat
 	/** text that appears when you open the input box(for re-inputting */
 	protected static String inputFieldText = "";
 
+	// TODO: 解像度に合わせてyをセットすべき
 	private static final int BUTTON_FIRST_X = 5;
 	private static final int BUTTON_Y = 205;
 	private static final int BUTTON_MARGIN = 3;
@@ -75,8 +76,9 @@ public class GuiChatWithAnnotation extends GuiChat
     	if(activatedButton == null)
     	{
     		inputFieldText = msg;
+
     		// TODO: 管理者なら無視するようにする？
-    		// show error message only to the sender in a red text
+    		// show error message only to the sender(in a red text)
     		TextComponentString errorMessage = new TextComponentString("対話行為が選択されていません．>" + msg);
     		Style style = new Style();
     		style.setColor(TextFormatting.RED);
@@ -89,22 +91,6 @@ public class GuiChatWithAnnotation extends GuiChat
     	// TODO: チャットの形式を変える
     	msg = "<" + activatedButton.displayString + "> " + msg;
     	super.sendChatMessage(msg);
-    }
-
-    @Override
-    public void sendChatMessage(String msg, boolean addToChat)
-    {
-        msg = net.minecraftforge.event.ForgeEventFactory.onClientSendMessage(msg);
-        if (msg.isEmpty()) return;
-        if (addToChat)
-        {
-        	// FIXME: 送信側には見えていてもいいかもしれない
-        	msg = msg.substring(msg.indexOf(">") + 1);
-            this.mc.ingameGUI.getChatGUI().addToSentMessages(msg);
-        }
-        if (net.minecraftforge.client.ClientCommandHandler.instance.executeCommand(mc.player, msg) != 0) return;
-
-        this.mc.player.sendChatMessage(msg);
     }
 
     @Override

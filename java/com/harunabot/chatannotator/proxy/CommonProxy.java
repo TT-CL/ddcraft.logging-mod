@@ -1,5 +1,8 @@
 package com.harunabot.chatannotator.proxy;
 
+import java.lang.annotation.Annotation;
+
+import com.harunabot.chatannotator.util.handlers.AnnotationHandler;
 import com.harunabot.chatannotator.util.handlers.RegistryHandler;
 
 import net.minecraftforge.fml.common.Mod;
@@ -16,20 +19,18 @@ public class CommonProxy
 {
     public void preInit(FMLPreInitializationEvent event)
     {
-    	System.out.println("CommonProxy.preInit");
-
-		RegistryHandler.preInitRegistries(event);
+    	RegistryHandler.preInitRegistries(event);
+    	//AnnotationHandler.preInit(event);
     }
 
     public void init(FMLInitializationEvent event) {
-        System.out.println("CommonProxy.init");
-
-        RegistryHandler.initRegistries(event);
+    	RegistryHandler.initRegistries(event);
+    	AnnotationHandler.init(event);
     }
 
     public void postInit(FMLPostInitializationEvent event) {
-    	System.out.println("CommonProxy.postInit");
+    	RegistryHandler.postInitRegistries(event);
+    	AnnotationHandler.postInit(event);
 
-		RegistryHandler.postInitRegistries(event);
     }
 }

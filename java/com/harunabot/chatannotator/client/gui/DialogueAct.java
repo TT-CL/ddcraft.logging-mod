@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import scala.actors.threadpool.Arrays;
+import scala.annotation.varargs;
 
 public enum DialogueAct
 {
@@ -33,6 +34,18 @@ public enum DialogueAct
 	public String getName()
 	{
 		return name;
+	}
+
+	public static DialogueAct convertFromName(String name)
+	{
+		for(DialogueAct dialogueAct:getList())
+		{
+			if(dialogueAct.name.equals(name))
+			{
+				return dialogueAct;
+			}
+		}
+		return null;
 	}
 
 	public static List<DialogueAct> getList()

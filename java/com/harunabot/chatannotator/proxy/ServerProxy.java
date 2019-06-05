@@ -1,7 +1,7 @@
 package com.harunabot.chatannotator.proxy;
 
 
-import com.harunabot.chatannotator.util.handlers.ChatHandler;
+import com.harunabot.chatannotator.util.handlers.AnnotationHandler;
 
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -18,24 +18,16 @@ public class ServerProxy extends CommonProxy
 	@Override
     public void preInit(FMLPreInitializationEvent event) {
 		super.preInit(event);
-
-		System.out.println("ServerProxy.preInit");
-		ChatHandler.preInit(event);
+		AnnotationHandler.preInit(event);
     }
 
 	@Override
     public void init(FMLInitializationEvent event) {
 		super.init(event);
-
-        System.out.println("ServerProxy.init");
-        ChatHandler.init(event);
     }
 
 	@Override
     public void postInit(FMLPostInitializationEvent event) {
 		super.postInit(event);
-
-    	System.out.println("ServerProxy.postInit");
-    	ChatHandler.postInit(event);
     }
 }
