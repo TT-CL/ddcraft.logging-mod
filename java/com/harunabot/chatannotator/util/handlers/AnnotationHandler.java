@@ -14,6 +14,7 @@ import com.harunabot.chatannotator.server.AnnotationLog;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
 
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
@@ -66,7 +67,6 @@ public class AnnotationHandler
 		ITextComponent newComponent = createAnnotatedServerChat((TextComponentTranslation) component, event);
 
 		event.setComponent(newComponent);
-		System.out.println(newComponent.toString());
 	}
 
 	/**
@@ -74,14 +74,15 @@ public class AnnotationHandler
 	 * @param event
 	 */
 
-	// TODO: 置き換えると何故かStringになってしまっている
-	// 置き換えない場合どうなっているか確認して直す
+	// TODO: TextAnnotationにならない
+	// →置き換えなくてもStringになる
 	// 最悪サーバー側に保存して引っ張ってくるとか？
 	@SubscribeEvent
 	public static void onReceivedClientChat(ClientChatReceivedEvent event)
 	{
-		/*
+
 		Main.LOGGER.log(Level.INFO, event.getMessage().toString());
+		/*
 		event.setMessage(event.getMessage().setStyle(new Style().setColor(TextFormatting.UNDERLINE)));
 
 
@@ -131,7 +132,12 @@ public class AnnotationHandler
 		// Set new component
 		args[1] = newMsgComponent;
 
-		System.out.println(args.toString());
+		/*
+		Main.LOGGER.log(Level.INFO, "key: " +component.getKey());
+		Main.LOGGER.log(Level.INFO, "toString: " + component.toString());
+		Main.LOGGER.log(Level.INFO, "unformatted: " + component.getUnformattedComponentText());
+		Main.LOGGER.log(Level.INFO, "formatted: " + component.getFormattedText());
+		*/
 
 		return new TextComponentTranslation(component.getKey(), args);
 	}
@@ -180,6 +186,8 @@ public class AnnotationHandler
 		TextComponentAnnotation annotatedChat = new TextComponentAnnotation(msg, annotation, senderId);
 		// Take log
 		writeLog(annotatedChat);
+
+		annotatedChat.setStyle(new Style().setUnderlined(true));
 
 		return annotatedChat;
 	}
