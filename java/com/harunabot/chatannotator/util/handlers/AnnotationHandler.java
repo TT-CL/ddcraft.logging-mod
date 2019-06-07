@@ -3,7 +3,6 @@ package com.harunabot.chatannotator.util.handlers;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
@@ -14,15 +13,9 @@ import com.harunabot.chatannotator.client.gui.DialogueAct;
 import com.harunabot.chatannotator.server.AnnotationLog;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.HoverEvent;
-import net.minecraft.world.World;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -30,8 +23,6 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 @Mod.EventBusSubscriber
 public class AnnotationHandler
@@ -42,23 +33,18 @@ public class AnnotationHandler
 
 	public static void preInit(FMLPreInitializationEvent event)
 	{
-		// no pre-initialization for remote client
-		if (Minecraft.getMinecraft().world.isRemote) return;
-
-		// make output file if on server
+		// Make output file
 		// TODO: separate by world
 		String date = new SimpleDateFormat("yy-MM-dd_HH.mm.ss").format(new Date());
 		String filePath = DIR_NAME + "/chatLog_" + date + ".log";
-
 		createOutputFile(DIR_NAME, filePath);
 
-		// initialize logger
+		// Initialize logger
 		annotationLog = new AnnotationLog(filePath);
 	}
 
 	public static void init(FMLInitializationEvent event)
 	{
-
 	}
 
 	public static void postInit(FMLPostInitializationEvent event)
@@ -66,89 +52,156 @@ public class AnnotationHandler
 	}
 
 
+
+	/**
+	 * Change chat message to TextComponentAnnotation
+	 * and take log?
+	 */
 	@SubscribeEvent
 	public static void onServerChat(ServerChatEvent event)
 	{
-		/**
-		 * change text component(message) in translatable component to annotated component
-		 */
 		ITextComponent component = event.getComponent();
 		if(!(event.getComponent() instanceof TextComponentTranslation)) return;
 
 		ITextComponent newComponent = createAnnotatedServerChat((TextComponentTranslation) component, event);
 
 		event.setComponent(newComponent);
-		// event.setComponent(event.getComponent().setStyle(style));
-		//annotationLog.writeLog();
-		// いい感じに保存する
-		/*
-		Style style = new Style();
-		style.setColor(TextFormatting.AQUA);
-		event.setComponent(event.getComponent().setStyle(style));
-
-		System.out.println(event.getMessage());]
-		*/
-
-		// take log
-		if( !event.getPlayer().world.isRemote)
-		{
-			annotationLog.writeLog();
-		}
+		System.out.println(newComponent.toString());
 	}
+
+	/**
+	 * Set the proper style
+	 * @param event
+	 */
+
+	// TODO: 置き換えると何故かStringになってしまっている
+	// 置き換えない場合どうなっているか確認して直す
+	// 最悪サーバー側に保存して引っ張ってくるとか？
+	@SubscribeEvent
+	public static void onReceivedClientChat(ClientChatReceivedEvent event)
+	{
+		/*
+		Main.LOGGER.log(Level.INFO, event.getMessage().toString());
+		event.setMessage(event.getMessage().setStyle(new Style().setColor(TextFormatting.UNDERLINE)));
+
+
+		ITextComponent component = event.getMessage();
+		if(!(component instanceof TextComponentTranslation)) return;
+
+		// Find Message Component
+		Object[] args = ((TextComponentTranslation) component).getFormatArgs();
+		Object msgObject = args[1];
+		if(!(msgObject instanceof TextComponentAnnotation))
+		{
+			Main.LOGGER.log(Level.ERROR, "Can't find message component on client: " + component.toString());
+			Main.LOGGER.log(Level.ERROR, "Can't find message component on client: " + msgObject.toString());
+			return;
+		}
+
+		// Set chat to proper style based on the sender/receiver
+		TextComponentAnnotation msgComponent = (TextComponentAnnotation) msgObject;
+		UUID receiverId = Minecraft.getMinecraft().player.getUniqueID();
+		msgComponent.toProperStyle(receiverId);
+		*/
+	}
+
+	/**
+	 * Find chat TextComponentString from TextComponentTranslation and replaces it with TextComponentAnnotation
+	 */
 	private static ITextComponent createAnnotatedServerChat(TextComponentTranslation component, ServerChatEvent event)
 	{
+		// Find message component
 		Object[] args = component.getFormatArgs();
-
-		Object msgObject = args[1];
-		if(!(msgObject instanceof TextComponentString))
+		TextComponentString msgComponent= findMsgComponent(args);
+		if(msgComponent == null)
 		{
-			// ERROR if second component is not text
-			Main.LOGGER.log(Level.ERROR, "invalid translatable component: " + component.getFormattedText());
+			Main.LOGGER.log(Level.ERROR, "Can't find message component: " + component.getFormattedText());
 			return component;
 		}
 
-		TextComponentString msgComponent = (TextComponentString) msgObject;
-		String rawMsg = msgComponent.getText();
-
-		// main message
-		// TODO: error check
-		String msg = rawMsg.substring(rawMsg.indexOf(">") + 1);
-
-		// dialogue act selected by sender
-		String annotationStr = rawMsg.substring(1,rawMsg.indexOf(">"));
-		DialogueAct annotation = DialogueAct.convertFromName(annotationStr);
-		if(annotation == null) {
-			// ERROR if no annotation is found
-			Main.LOGGER.log(Level.ERROR, "invalid textcomponent: {msg: " + msg + ", annotation: " + annotationStr + "}");
-			return component;
-		}
-
-		// sender's UUID
+		// Sender's UUID
 		UUID senderId = event.getPlayer().getUniqueID();
+		ITextComponent newMsgComponent = createAnnotatedChat(msgComponent, senderId);
+		if(newMsgComponent == null) {
+			// Something wrong with the message
+			Main.LOGGER.log(Level.ERROR, "Invalid chat textcomponent: " + msgComponent.getText());
+			return component;
+		}
 
-		ITextComponent newMsgComponent = new TextComponentAnnotation(msg, annotation, senderId);
+		// Set new component
 		args[1] = newMsgComponent;
+
+		System.out.println(args.toString());
 
 		return new TextComponentTranslation(component.getKey(), args);
 	}
 
-
-	@SubscribeEvent
-	public static void onReceivedChat(ClientChatReceivedEvent event)
+	/**
+	 * Find Chat message part from TextComponentTranslation
+	 */
+	private static TextComponentString findMsgComponent(Object[] args)
 	{
-		if(event.getType() != ChatType.CHAT) return;
+		Object msgObject = args[1];
+		if(!(msgObject instanceof TextComponentString))
+		{
+			return null;
+		}
 
-		Style style = new Style();
-		style.setColor(TextFormatting.YELLOW);
-		style.setColor(TextFormatting.UNDERLINE);
-		//style.setHoverEvent()
+		return (TextComponentString) msgObject;
+	}
 
-		//event.setMessage(event.getMessage().setStyle(style));
+	/**
+	 * Create new TextComponentAnnotation from TextComponentString
+	 */
+	private static TextComponentAnnotation createAnnotatedChat(TextComponentString msgComponent, UUID senderId)
+	{
+		// Separate the message into the annoation part & main part
+		String rawMsg = msgComponent.getText();
+		String msg; //= rawMsg.substring(rawMsg.indexOf("+") + 1);
+		String annotationStr;
+		DialogueAct annotation;
+		try
+		{
+			msg = rawMsg.substring(rawMsg.indexOf(">") + 1);
+			annotationStr = rawMsg.substring(1,rawMsg.indexOf(">"));
+		}
+		catch (IndexOutOfBoundsException e)
+		{
+			return null;
+		}
+
+		// Resolve annotation
+		annotation = DialogueAct.convertFromName(annotationStr);
+		if (annotation == null)
+		{
+			return null;
+		}
+
+		TextComponentAnnotation annotatedChat = new TextComponentAnnotation(msg, annotation, senderId);
+		// Take log
+		writeLog(annotatedChat);
+
+		return annotatedChat;
 	}
 
 	public static void onAnnotatedChat()
 	{
 
+	}
+
+	/**
+	 * Take log
+	 */
+	protected static void writeLog(TextComponentAnnotation component)
+	{
+		try
+		{
+			annotationLog.writeLog((TextComponentAnnotation) component);
+		}
+		catch(NullPointerException e)
+		{
+			Main.LOGGER.log(Level.ERROR, "Can't find log file");
+		}
 	}
 
 	/**
