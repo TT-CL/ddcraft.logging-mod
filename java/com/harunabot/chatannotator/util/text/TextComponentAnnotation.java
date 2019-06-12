@@ -2,10 +2,15 @@ package com.harunabot.chatannotator.util.text;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
+import org.apache.logging.log4j.Level;
+
 import com.google.common.collect.Lists;
+import com.harunabot.chatannotator.Main;
 import com.harunabot.chatannotator.client.gui.DialogueAct;
+import com.harunabot.chatannotator.util.text.event.AnnotationClickEvent;
 
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
@@ -17,44 +22,59 @@ public class TextComponentAnnotation extends TextComponentString
 	/**
 	 * dialogue act selected by text sender
 	 */
-	private final DialogueAct senderAnnotation;
-	private DialogueAct receiverAnnotation;
-	private final UUID senderId;
-	private final String time;
+	protected DialogueAct senderAnnotation;
+	protected DialogueAct receiverAnnotation;
+	protected String senderId;
+	protected String time;
+	protected String fullMsg;
 
-	private final int PARAM_NUM = 4;
+	private final int PARAM_NUM = 5;
 
 	// TODO: sendername
     public TextComponentAnnotation(String msg, DialogueAct senderAnnotation, UUID senderId)
     {
-    	this(msg,senderAnnotation, null, senderId, new SimpleDateFormat("HH:mm:ss").format(new Date()));
+    	this(msg,senderAnnotation, null, senderId.toString(), new SimpleDateFormat("HH:mm:ss").format(new Date()));
     }
 
-    public TextComponentAnnotation(String msg, DialogueAct senderAnnotation, DialogueAct receiverAnnotation, UUID senderId, String time)
+    public TextComponentAnnotation(String msg, DialogueAct senderAnnotation, DialogueAct receiverAnnotation, String senderId, String time)
     {
     	super(msg);
 
     	this.senderAnnotation = senderAnnotation;
     	this.receiverAnnotation = receiverAnnotation;
-    	this.senderId = senderId;
+    	this.senderId = senderId.toString();
     	this.time = time;
+    	this.fullMsg = msg;
     }
 
     // Recreate from TextComponentString
-    /*
     public TextComponentAnnotation(TextComponentString component)
     {
-    	if(component.getSiblings().size() < PARAM_NUM)
-    	{
-    		Main.LOGGER.log(Level.ERROR, "TextComponentAnnotation: invalid componentString");
+    	super(component.getText());
 
+    	try
+    	{
+    		// FIXME: null annotation
+	    	List<ITextComponent> siblings = component.getSiblings();
+	    	this.senderAnnotation = DialogueAct.convertFromName(siblings.get(0).getUnformattedText());
+	    	this.receiverAnnotation = DialogueAct.convertFromName(siblings.get(1).getUnformattedText());
+	    	this.senderId = siblings.get(2).getUnformattedText();
+	    	this.time = siblings.get(3).getUnformattedText();
+	    	this.fullMsg = siblings.get(4).getUnformattedText();
     	}
-    	for(int i = 0; i < 4; i++)
+    	catch (Exception e)
     	{
+    		System.out.println(e);
+    		Main.LOGGER.log(Level.ERROR, "TextComponentAnnotation::invalid componentString : " + component.toString());
+    		this.senderAnnotation = null;
+    		this.receiverAnnotation = null;
+    		this.senderId = "";
+    		this.time = "";
+    		this.fullMsg = "";
 
+    		return;
     	}
     }
-    */
 
     public TextComponentString toComponentString()
     {
@@ -62,12 +82,17 @@ public class TextComponentAnnotation extends TextComponentString
     	{
     		this.siblings = Lists.<ITextComponent>newArrayList();
     	}
-    	appendText((senderAnnotation != null) ? senderAnnotation.getName() : "null");
-    	appendText((receiverAnnotation != null) ? receiverAnnotation.getName() : "null");
-    	appendText(senderId.toString());
-    	appendText(time.toString());
+    	TextComponentString componentString = (TextComponentString) this.createCopy();
+    	componentString.appendText((senderAnnotation != null) ? senderAnnotation.getName() : "null");
+    	componentString.appendText((receiverAnnotation != null) ? receiverAnnotation.getName() : "null");
+    	componentString.appendText(senderId.toString());
+    	componentString.appendText(time.toString());
+    	componentString.appendText(fullMsg);
 
-    	return (TextComponentString)this;
+    	// Set style to prevent it from changing to String
+		componentString.setStyle(new Style().setColor(TextFormatting.BLACK));
+
+    	return componentString;
     }
 
     public String getTime()
@@ -82,20 +107,39 @@ public class TextComponentAnnotation extends TextComponentString
 
     public void toProperStyle(UUID receiverId)
     {
-    	System.out.println(senderId + ", " + receiverId);
-    	// Do nothing for sender
-    	if(receiverId.equals(senderId)) {
-    		this.setStyle(new Style().setColor(TextFormatting.YELLOW));
+    	// Sender -> default
+    	if(receiverId.toString().equals(senderId)) {
+    		this.toDefaultStyle();
     		return;
     	}
 
-    	this.setStyle(new Style().setColor(TextFormatting.BLUE));
+    	// Receiver -> AnnotationClickEvent, color = YELLOW, underlined
+    	Style newStyle = new Style();
+    	newStyle.setColor(TextFormatting.YELLOW);
+    	newStyle.setUnderlined(true);
+    	newStyle.setClickEvent(new AnnotationClickEvent());
+    	this.setStyle(newStyle);
+    }
+
+    public void toDefaultStyle()
+    {
+    	// white, no other style
+		this.setStyle(new Style().setColor(TextFormatting.WHITE));
     }
 
 	@Override
 	public TextComponentAnnotation createCopy()
 	{
-		TextComponentAnnotation textcomponentannotation = new TextComponentAnnotation(this.getText(), this.senderAnnotation, this.receiverAnnotation, this.senderId, this.time);
+		return this.createPartialCopy(this.getText());
+	}
+
+    public TextComponentAnnotation createPartialCopy(String msg)
+	{
+    	if(!(this.getText().contains(msg) || this.getText().equals(msg))) {
+    		System.out.println("Not partial: '" + msg + "' , '" + this.getText() + "'");
+    	}
+
+    	TextComponentAnnotation textcomponentannotation = new TextComponentAnnotation(msg, this.senderAnnotation, this.receiverAnnotation, this.senderId.toString(), this.time);
 		textcomponentannotation.setStyle(this.getStyle().createShallowCopy());
 
 		for(ITextComponent iTextComponent : this.getSiblings())

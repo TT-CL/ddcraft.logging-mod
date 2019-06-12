@@ -3,9 +3,6 @@ package com.harunabot.chatannotator.client.gui;
 import java.util.ArrayList;
 import java.util.List;
 
-import scala.actors.threadpool.Arrays;
-import scala.annotation.varargs;
-
 public enum DialogueAct
 {
 	QUESTION(0,"質問"),

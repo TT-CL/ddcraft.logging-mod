@@ -6,15 +6,18 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.ibm.icu.impl.locale.StringTokenIterator;
+import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
+import com.harunabot.chatannotator.util.text.event.AnnotationClickEvent;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.util.text.ChatType;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentScore;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.event.ClickEvent;
 
 public class GuiChatWithAnnotation extends GuiChat
 {
@@ -79,7 +82,7 @@ public class GuiChatWithAnnotation extends GuiChat
 
     		// TODO: 管理者なら無視するようにする？
     		// show error message only to the sender(in a red text)
-    		TextComponentString errorMessage = new TextComponentString("対話行為が選択されていません．>" + msg);
+    		TextComponentString errorMessage = new TextComponentString("対話行為が選択されていません >> " + msg);
     		Style style = new Style();
     		style.setColor(TextFormatting.RED);
     		this.mc.ingameGUI.addChatMessage(ChatType.SYSTEM, errorMessage.setStyle(style));
@@ -89,9 +92,65 @@ public class GuiChatWithAnnotation extends GuiChat
     	// success
     	inputFieldText = "";
     	// TODO: チャットの形式を変える
-    	msg = "<" + activatedButton.displayString + "> " + msg;
+    	msg = "<" + activatedButton.displayString + ">" + msg;
     	super.sendChatMessage(msg);
     }
+
+	@Override
+	public boolean handleComponentClick(ITextComponent component)
+	{
+		// TextComponentにされてしまっているので受け手側を変える or  無理やりやる
+
+		// Default action for non-annotationComponent
+		if(!(component instanceof TextComponentAnnotation))
+		{
+	        System.out.println("COMPONENT ERROR");
+	        System.out.println(component.toString());
+			//return super.handleComponentClick(component);
+		}
+
+//		TextComponentString componentAnnotation = (TextComponentAnnotation) component;
+//        ClickEvent clickevent = componentAnnotation.getStyle().getClickEvent();
+        ClickEvent clickevent = component.getStyle().getClickEvent();
+        if(clickevent == null || !(clickevent instanceof AnnotationClickEvent))
+    	{
+            System.out.println("TYPE ERROR");
+        	//return false;
+        }
+
+        System.out.println("CLICKED");
+
+        // Don't need AnnotationClickEvent instance; it's just for checking
+
+        // Show GUI
+
+        // send annotation to the server
+        // this.sendChat("",false?);
+
+        // Reset style
+        //componentAnnotation.toDefaultStyle();
+        component.setStyle(new Style());
+
+        return true;
+	}
+
+
+
+/*=========================================================================================*/
+
+
+	@Override
+	protected void handleComponentHover(ITextComponent component, int x, int y)
+	{
+		// Default action for non-annotationComponent
+		if(!(component instanceof TextComponentTranslation))
+		{
+			super.handleComponentHover(component, x, y);
+			return;
+		}
+
+
+	}
 
     @Override
     protected void actionPerformed(GuiButton button) throws IOException

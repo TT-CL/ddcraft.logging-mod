@@ -13,8 +13,8 @@ import com.harunabot.chatannotator.client.gui.DialogueAct;
 import com.harunabot.chatannotator.server.AnnotationLog;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
@@ -29,6 +29,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class AnnotationHandler
 {
 	private static final String DIR_NAME = "annotationLogs";
+	private static final String CHAT_KEY = "chat.type.text";
 
 	public static AnnotationLog annotationLog;
 
@@ -73,37 +74,42 @@ public class AnnotationHandler
 	 * Set the proper style
 	 * @param event
 	 */
-
-	// TODO: TextAnnotationにならない
-	// →置き換えなくてもStringになる
-	// 最悪サーバー側に保存して引っ張ってくるとか？
+	// TODO: chatのみをチェック
 	@SubscribeEvent
 	public static void onReceivedClientChat(ClientChatReceivedEvent event)
 	{
-
+		//TEMP
 		Main.LOGGER.log(Level.INFO, event.getMessage().toString());
-		/*
-		event.setMessage(event.getMessage().setStyle(new Style().setColor(TextFormatting.UNDERLINE)));
 
+		if(!(event.getMessage() instanceof TextComponentTranslation)) return;
 
-		ITextComponent component = event.getMessage();
-		if(!(component instanceof TextComponentTranslation)) return;
+		TextComponentTranslation component = (TextComponentTranslation) event.getMessage();
+		// Pass non-chat message
+		if(!component.getKey().equals(CHAT_KEY)) return;
 
 		// Find Message Component
-		Object[] args = ((TextComponentTranslation) component).getFormatArgs();
-		Object msgObject = args[1];
-		if(!(msgObject instanceof TextComponentAnnotation))
-		{
-			Main.LOGGER.log(Level.ERROR, "Can't find message component on client: " + component.toString());
-			Main.LOGGER.log(Level.ERROR, "Can't find message component on client: " + msgObject.toString());
-			return;
-		}
+		Object[] args = component.getFormatArgs();
+		TextComponentString msgComponentString = findMsgComponent(args);
+
+		// Convert to TextComponentAnnotation
+		TextComponentAnnotation msgComponent = new TextComponentAnnotation(msgComponentString);
+		if(msgComponent.getTime().equals("")) return;
 
 		// Set chat to proper style based on the sender/receiver
-		TextComponentAnnotation msgComponent = (TextComponentAnnotation) msgObject;
 		UUID receiverId = Minecraft.getMinecraft().player.getUniqueID();
 		msgComponent.toProperStyle(receiverId);
-		*/
+
+		args[1] = msgComponent;
+		event.setMessage(new TextComponentTranslation(component.getKey(), args));
+	}
+
+	private static boolean isChatTranslationComponent(ITextComponent comp)
+	{
+		if(!(comp instanceof TextComponentTranslation)) return false;
+
+		TextComponentTranslation component = (TextComponentTranslation) comp;
+		String key = component.getKey();
+		return key == "";
 	}
 
 	/**
@@ -147,19 +153,18 @@ public class AnnotationHandler
 	 */
 	private static TextComponentString findMsgComponent(Object[] args)
 	{
-		Object msgObject = args[1];
-		if(!(msgObject instanceof TextComponentString))
+		if(args.length < 1 || !(args[1] instanceof TextComponentString))
 		{
 			return null;
 		}
 
-		return (TextComponentString) msgObject;
+		return (TextComponentString) args[1];
 	}
 
 	/**
-	 * Create new TextComponentAnnotation from TextComponentString
+	 * Create new AnnotatedComponent from TextComponentString
 	 */
-	private static TextComponentAnnotation createAnnotatedChat(TextComponentString msgComponent, UUID senderId)
+	private static TextComponentString createAnnotatedChat(TextComponentString msgComponent, UUID senderId)
 	{
 		// Separate the message into the annoation part & main part
 		String rawMsg = msgComponent.getText();
@@ -187,9 +192,7 @@ public class AnnotationHandler
 		// Take log
 		writeLog(annotatedChat);
 
-		annotatedChat.setStyle(new Style().setUnderlined(true));
-
-		return annotatedChat;
+		return annotatedChat.toComponentString();
 	}
 
 	public static void onAnnotatedChat()
