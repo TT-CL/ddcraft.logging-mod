@@ -8,7 +8,7 @@ import java.util.UUID;
 
 import org.apache.logging.log4j.Level;
 
-import com.harunabot.chatannotator.Main;
+import com.harunabot.chatannotator.ChatAnnotator;
 import com.harunabot.chatannotator.client.gui.DialogueAct;
 import com.harunabot.chatannotator.server.AnnotationLog;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
@@ -74,12 +74,11 @@ public class AnnotationHandler
 	 * Set the proper style
 	 * @param event
 	 */
-	// TODO: chatのみをチェック
 	@SubscribeEvent
 	public static void onReceivedClientChat(ClientChatReceivedEvent event)
 	{
 		//TEMP
-		Main.LOGGER.log(Level.INFO, event.getMessage().toString());
+		//ChatAnnotator.LOGGER.log(Level.INFO, event.getMessage().toString());
 
 		if(!(event.getMessage() instanceof TextComponentTranslation)) return;
 
@@ -101,6 +100,11 @@ public class AnnotationHandler
 
 		args[1] = msgComponent;
 		event.setMessage(new TextComponentTranslation(component.getKey(), args));
+	}
+
+	private static boolean isAnnotation(TextComponentString component)
+	{
+		return component.getText().startsWith("[");
 	}
 
 	private static boolean isChatTranslationComponent(ITextComponent comp)
@@ -131,19 +135,12 @@ public class AnnotationHandler
 		ITextComponent newMsgComponent = createAnnotatedChat(msgComponent, senderId);
 		if(newMsgComponent == null) {
 			// Something wrong with the message
-			Main.LOGGER.log(Level.ERROR, "Invalid chat textcomponent: " + msgComponent.getText());
+			ChatAnnotator.LOGGER.log(Level.ERROR, "Invalid chat textcomponent: " + msgComponent.getText());
 			return component;
 		}
 
 		// Set new component
 		args[1] = newMsgComponent;
-
-		/*
-		Main.LOGGER.log(Level.INFO, "key: " +component.getKey());
-		Main.LOGGER.log(Level.INFO, "toString: " + component.toString());
-		Main.LOGGER.log(Level.INFO, "unformatted: " + component.getUnformattedComponentText());
-		Main.LOGGER.log(Level.INFO, "formatted: " + component.getFormattedText());
-		*/
 
 		return new TextComponentTranslation(component.getKey(), args);
 	}
@@ -211,7 +208,7 @@ public class AnnotationHandler
 		}
 		catch(NullPointerException e)
 		{
-			Main.LOGGER.log(Level.ERROR, "Can't find log file");
+			ChatAnnotator.LOGGER.log(Level.ERROR, "Can't find log file");
 		}
 	}
 
@@ -225,7 +222,7 @@ public class AnnotationHandler
         try {
         	if(!dir.exists()) dir.mkdir();
             file.createNewFile();
-            Main.LOGGER.log(Level.INFO, "Successfully created output file");
+            ChatAnnotator.LOGGER.log(Level.INFO, "Successfully created output file");
         } catch (IOException e) {
             e.printStackTrace();
         }
