@@ -8,7 +8,7 @@ import java.util.UUID;
 import org.apache.logging.log4j.Level;
 
 import com.google.common.collect.Lists;
-import com.harunabot.chatannotator.Main;
+import com.harunabot.chatannotator.ChatAnnotator;
 import com.harunabot.chatannotator.client.gui.DialogueAct;
 import com.harunabot.chatannotator.util.text.event.AnnotationClickEvent;
 
@@ -54,18 +54,18 @@ public class TextComponentAnnotation extends TextComponentString
 
     	try
     	{
-    		// FIXME: null annotation
 	    	List<ITextComponent> siblings = component.getSiblings();
 	    	this.senderAnnotation = DialogueAct.convertFromName(siblings.get(0).getUnformattedText());
 	    	this.receiverAnnotation = DialogueAct.convertFromName(siblings.get(1).getUnformattedText());
 	    	this.senderId = siblings.get(2).getUnformattedText();
 	    	this.time = siblings.get(3).getUnformattedText();
 	    	this.fullMsg = siblings.get(4).getUnformattedText();
+	    	this.setStyle(component.getStyle().createDeepCopy());
     	}
     	catch (Exception e)
     	{
     		System.out.println(e);
-    		Main.LOGGER.log(Level.ERROR, "TextComponentAnnotation::invalid componentString : " + component.toString());
+    		ChatAnnotator.LOGGER.log(Level.ERROR, "TextComponentAnnotation::invalid componentString : " + component.toString());
     		this.senderAnnotation = null;
     		this.receiverAnnotation = null;
     		this.senderId = "";
@@ -74,6 +74,11 @@ public class TextComponentAnnotation extends TextComponentString
 
     		return;
     	}
+    }
+
+    public void annotateByReceiver(DialogueAct annotation)
+    {
+    	this.receiverAnnotation = annotation;
     }
 
     public TextComponentString toComponentString()
@@ -108,13 +113,15 @@ public class TextComponentAnnotation extends TextComponentString
     public void toProperStyle(UUID receiverId)
     {
     	// Sender -> default
+    	/*
     	if(receiverId.toString().equals(senderId)) {
     		this.toDefaultStyle();
     		return;
     	}
+    	*/
 
     	// Receiver -> AnnotationClickEvent, color = YELLOW, underlined
-    	Style newStyle = new Style();
+    	Style newStyle = this.getStyle();
     	newStyle.setColor(TextFormatting.YELLOW);
     	newStyle.setUnderlined(true);
     	newStyle.setClickEvent(new AnnotationClickEvent());
@@ -124,7 +131,9 @@ public class TextComponentAnnotation extends TextComponentString
     public void toDefaultStyle()
     {
     	// white, no other style
-		this.setStyle(new Style().setColor(TextFormatting.WHITE));
+		Style style = this.getStyle();
+		style.setColor(TextFormatting.WHITE);
+		style.setClickEvent(null);
     }
 
 	@Override
@@ -135,8 +144,9 @@ public class TextComponentAnnotation extends TextComponentString
 
     public TextComponentAnnotation createPartialCopy(String msg)
 	{
-    	if(!(this.getText().contains(msg) || this.getText().equals(msg))) {
-    		System.out.println("Not partial: '" + msg + "' , '" + this.getText() + "'");
+    	msg = StringTools.deleteIllegalCharacters(msg);
+    	if(!(this.fullMsg.contains(msg)) && !(this.fullMsg.equals(msg))) {
+    		System.out.println("Not partial: '" + msg + "' , '" + this.fullMsg + "'");
     	}
 
     	TextComponentAnnotation textcomponentannotation = new TextComponentAnnotation(msg, this.senderAnnotation, this.receiverAnnotation, this.senderId.toString(), this.time);
@@ -166,4 +176,10 @@ public class TextComponentAnnotation extends TextComponentString
     	return "{text:'" + this.getText() + "', senderId:" + this.senderId + ", senderAnnotation=" + this.senderAnnotation + ","
     			+ " receiverAnnotation=" + receiverAnnotation + ", time=" + this.time + '}';
     }
+
+    public String toIdenticalString()
+    {
+    	return "{text:'" + this.getText() + "', senderId:" + this.senderId + ", time=" + this.time + '}';
+    }
+
 }

@@ -13,10 +13,10 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 @Mod(modid = Reference.MOD_ID, name= Reference.NAME, version = Reference.VERSION)
-public class Main
+public class ChatAnnotator
 {
 	@Instance
-	public static Main instance;
+	public static ChatAnnotator instance;
 
 	@SidedProxy(clientSide = Reference.CLIENT_PROXY_CLASS, serverSide = Reference.SERVER_PROXY_CLASS)
 	public static CommonProxy proxy;

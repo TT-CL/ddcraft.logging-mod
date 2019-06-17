@@ -2,6 +2,9 @@ package com.harunabot.chatannotator.util.handlers;
 
 import java.lang.reflect.Field;
 
+import org.apache.logging.log4j.Level;
+
+import com.harunabot.chatannotator.ChatAnnotator;
 import com.harunabot.chatannotator.client.gui.GuiChatWithAnnotation;
 import com.harunabot.chatannotator.client.gui.MyGuiNewChat;
 
@@ -59,6 +62,7 @@ public class ClientEventHandler
 			e.printStackTrace();
 		}
 
-		System.out.println("Replaced GuiNewChat: " + ingameGUI.getChatGUI().toString());
+		// log
+		ChatAnnotator.LOGGER.log(Level.INFO, "Replaced GuiNewChat: " + ingameGUI.getChatGUI().toString());
 	}
 }

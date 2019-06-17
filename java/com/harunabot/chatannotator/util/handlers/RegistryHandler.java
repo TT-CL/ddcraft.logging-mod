@@ -1,6 +1,6 @@
 package com.harunabot.chatannotator.util.handlers;
 
-import com.harunabot.chatannotator.Main;
+import com.harunabot.chatannotator.ChatAnnotator;
 
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -18,7 +18,7 @@ public class RegistryHandler
 
 	public static void initRegistries(FMLInitializationEvent event)
 	{
-		NetworkRegistry.INSTANCE.registerGuiHandler(Main.instance, new GuiHandler());
+		NetworkRegistry.INSTANCE.registerGuiHandler(ChatAnnotator.instance, new GuiHandler());
 	}
 
 	public static void postInitRegistries(FMLPostInitializationEvent event)

@@ -19,6 +19,7 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -45,6 +46,14 @@ public class AnnotationHandler
 		annotationLog = new AnnotationLog(filePath);
 	}
 
+	@SubscribeEvent
+	public static void onFinishGame(WorldEvent.Unload event)
+	{
+		if(event.getWorld().isRemote) return;
+
+		annotationLog.outputFile();
+	}
+
 	public static void init(FMLInitializationEvent event)
 	{
 	}
@@ -52,8 +61,6 @@ public class AnnotationHandler
 	public static void postInit(FMLPostInitializationEvent event)
 	{
 	}
-
-
 
 	/**
 	 * Change chat message to TextComponentAnnotation
@@ -63,11 +70,45 @@ public class AnnotationHandler
 	public static void onServerChat(ServerChatEvent event)
 	{
 		ITextComponent component = event.getComponent();
-		if(!(event.getComponent() instanceof TextComponentTranslation)) return;
+		AnnotationHandler.ComponentElements elements = validateServerChat(component);
+		if(elements == null) return;
 
-		ITextComponent newComponent = createAnnotatedServerChat((TextComponentTranslation) component, event);
+		// Sender's UUID
+		UUID senderId = event.getPlayer().getUniqueID();
 
-		event.setComponent(newComponent);
+		if(isAnnotation(elements.msgComponent))
+		{
+			// Annotate
+			onAnnotatedChat(elements.msgComponent.getText());
+			event.setCanceled(true);
+			return;
+		}
+		else
+		{
+			// Replace Chat
+			ITextComponent newComponent = createAnnotatedServerChat((TextComponentTranslation) component, elements, senderId);
+			event.setComponent(newComponent);
+		}
+	}
+
+	/**
+	 * Checks if serverEvent is valid for annotation chat
+	 */
+	private static ComponentElements validateServerChat(ITextComponent component)
+	{
+		// ComponentTranlation?
+		if(!(component instanceof TextComponentTranslation)) return null;
+
+		// Has message?
+		Object[] args = ((TextComponentTranslation) component).getFormatArgs();
+		TextComponentString msgComponent= findMsgComponent(args);
+		if(msgComponent == null)
+		{
+			ChatAnnotator.LOGGER.log(Level.ERROR, "Can't find message component: " + component.getFormattedText());
+			return null;
+		}
+
+		return new AnnotationHandler.ComponentElements(args, msgComponent);
 	}
 
 	/**
@@ -102,6 +143,7 @@ public class AnnotationHandler
 		event.setMessage(new TextComponentTranslation(component.getKey(), args));
 	}
 
+
 	private static boolean isAnnotation(TextComponentString component)
 	{
 		return component.getText().startsWith("[");
@@ -117,32 +159,21 @@ public class AnnotationHandler
 	}
 
 	/**
-	 * Find chat TextComponentString from TextComponentTranslation and replaces it with TextComponentAnnotation
+	 * Create new componentTranslation with annotated message
 	 */
-	private static ITextComponent createAnnotatedServerChat(TextComponentTranslation component, ServerChatEvent event)
+	private static ITextComponent createAnnotatedServerChat(TextComponentTranslation component, ComponentElements elements, UUID senderId)
 	{
-		// Find message component
-		Object[] args = component.getFormatArgs();
-		TextComponentString msgComponent= findMsgComponent(args);
-		if(msgComponent == null)
-		{
-			Main.LOGGER.log(Level.ERROR, "Can't find message component: " + component.getFormattedText());
-			return component;
-		}
-
-		// Sender's UUID
-		UUID senderId = event.getPlayer().getUniqueID();
-		ITextComponent newMsgComponent = createAnnotatedChat(msgComponent, senderId);
+		ITextComponent newMsgComponent = createAnnotatedChat(elements.msgComponent, senderId);
 		if(newMsgComponent == null) {
 			// Something wrong with the message
-			ChatAnnotator.LOGGER.log(Level.ERROR, "Invalid chat textcomponent: " + msgComponent.getText());
+			ChatAnnotator.LOGGER.log(Level.ERROR, "Invalid chat textcomponent: " + elements.msgComponent.getText());
 			return component;
 		}
 
 		// Set new component
-		args[1] = newMsgComponent;
+		elements.args[1] = newMsgComponent;
 
-		return new TextComponentTranslation(component.getKey(), args);
+		return new TextComponentTranslation(component.getKey(), elements.args);
 	}
 
 	/**
@@ -187,24 +218,40 @@ public class AnnotationHandler
 
 		TextComponentAnnotation annotatedChat = new TextComponentAnnotation(msg, annotation, senderId);
 		// Take log
-		writeLog(annotatedChat);
+		addNewChat(annotatedChat);
 
 		return annotatedChat.toComponentString();
 	}
 
-	public static void onAnnotatedChat()
+	public static void onAnnotatedChat(String rawMsg)
 	{
+		String annotationStr;
+		String identicalString;
+		DialogueAct annotation;
+		try
+		{
+			identicalString = rawMsg.substring(rawMsg.indexOf("]") + 1);
+			annotationStr = rawMsg.substring(1,rawMsg.indexOf("]"));
+			annotation = DialogueAct.convertFromName(annotationStr);
+			if(annotation == null) throw new IllegalArgumentException();
+		}
+		catch (IndexOutOfBoundsException|IllegalArgumentException e)
+		{
+			ChatAnnotator.LOGGER.log(Level.ERROR, "Something wrong with the annotation msg: " + rawMsg);
+			return;
+		}
 
+		annotationLog.annotateChat(annotation, identicalString);
 	}
 
 	/**
 	 * Take log
 	 */
-	protected static void writeLog(TextComponentAnnotation component)
+	protected static void addNewChat(TextComponentAnnotation component)
 	{
 		try
 		{
-			annotationLog.writeLog((TextComponentAnnotation) component);
+			annotationLog.addNewChat((TextComponentAnnotation) component);
 		}
 		catch(NullPointerException e)
 		{
@@ -226,5 +273,22 @@ public class AnnotationHandler
         } catch (IOException e) {
             e.printStackTrace();
         }
+	}
+
+	/*==========================================================*/
+
+	/**
+	 * For extracting necessary elements from component
+	 */
+	private static class ComponentElements
+	{
+		Object[] args;
+		TextComponentString msgComponent;
+
+		public ComponentElements(Object[] args, TextComponentString msgComponent)
+		{
+			this.args = args;
+			this.msgComponent = msgComponent;
+		}
 	}
 }

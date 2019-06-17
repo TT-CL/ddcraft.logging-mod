@@ -9,8 +9,11 @@ import org.apache.logging.log4j.Logger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ChatLine;
 import net.minecraft.client.gui.GuiNewChat;
+import net.minecraft.client.gui.GuiUtilRenderComponents;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -51,7 +54,6 @@ public class MyGuiNewChat extends GuiNewChat
 			e.printStackTrace();
 		}
 	}
-
 
 	@Override
 	/**
@@ -105,7 +107,6 @@ public class MyGuiNewChat extends GuiNewChat
 	                this.scroll(1);
 	            }
 
-	            System.out.println(itextcomponent);
 	            this.drawnChatLines.add(0, new ChatLine(updateCounter, itextcomponent, chatLineId));
 	        }
 
@@ -129,7 +130,57 @@ public class MyGuiNewChat extends GuiNewChat
 			System.err.println("Failed to execute MyGuiNewChat.setChatLine!");
 			e.printStackTrace();
 		}
+    }
 
-		System.out.println("SET_CHAT_LINE");
+    public void setChatComponent(int mouseX, int mouseY, ITextComponent textcomponent)
+    {
+        if (!this.getChatOpen()) return;
+
+    	try {
+			// Reflect GuiNewChat private fields
+	    	Field scrollPosField = GuiNewChat.class.getDeclaredField("scrollPos");
+			scrollPosField.setAccessible(true);
+		    int scrollPos = (int) scrollPosField.get(this);
+		    // Local fields
+            ScaledResolution scaledresolution = new ScaledResolution(this.mc);
+            int i = scaledresolution.getScaleFactor();
+            float f = this.getChatScale();
+            int j = mouseX / i - 2;
+            int k = mouseY / i - 40;
+            j = MathHelper.floor((float)j / f);
+            k = MathHelper.floor((float)k / f);
+
+            // Find chat component from mouse position(fixed GuiChat.getChatComponent)
+            if (!(j >= 0 && k >= 0)) return;
+
+            int l = Math.min(this.getLineCount(), this.drawnChatLines.size());
+            if (!(j <= MathHelper.floor((float)this.getChatWidth() / this.getChatScale()) && k < this.mc.fontRenderer.FONT_HEIGHT * l + l)) return;
+
+            int i1 = k / this.mc.fontRenderer.FONT_HEIGHT + scrollPos;
+            if (!(i1 >= 0 && i1 < this.drawnChatLines.size())) return;
+
+            ChatLine chatline = this.drawnChatLines.get(i1);
+            int j1 = 0;
+
+            for (ITextComponent itextcomponent : chatline.getChatComponent())
+            {
+            	System.out.println(itextcomponent.toString());
+                if (itextcomponent instanceof TextComponentString)
+                {
+                    j1 += this.mc.fontRenderer.getStringWidth(GuiUtilRenderComponents.removeTextColorsIfConfigured(((TextComponentString)itextcomponent).getText(), false));
+
+                    if (j1 > j)
+                    {
+                        //set
+                    	return;
+                    }
+                }
+            }
+        }
+		catch(NoSuchFieldException | IllegalAccessException e)
+		{
+			System.err.println("Failed to create MyGuiNewChat!");
+			e.printStackTrace();
+		}
     }
 }

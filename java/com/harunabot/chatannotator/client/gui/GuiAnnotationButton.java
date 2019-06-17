@@ -1,6 +1,5 @@
 package com.harunabot.chatannotator.client.gui;
 
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 
