@@ -3,7 +3,10 @@ package com.harunabot.chatannotator.client.gui;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.logging.log4j.Level;
+
 import com.google.common.collect.Lists;
+import com.harunabot.chatannotator.ChatAnnotator;
 import com.harunabot.chatannotator.util.text.StringTools;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
 
@@ -30,6 +33,10 @@ public class GuiAnnotationPopUp extends Gui
     /** The button that was just pressed. */
     protected GuiButton selectedButton;
 
+    /** position of component(got by org.lwjgl.input.Mouse.getX() or get y()) */
+    protected final int componentX;
+    protected final int componentY;
+
 	private int buttonY;
 	private final int BUTTON_FIRST_X = 5;
 	private final int BUTTON_MARGIN = 3;
@@ -37,7 +44,7 @@ public class GuiAnnotationPopUp extends Gui
 	private static final int BUTTON_HEIGHT = GuiAnnotationButton.HEIGHT;
 	private static final int BUTTON_FIRST_ID = 100;
 
-	public GuiAnnotationPopUp(Minecraft mc, GuiChatWithAnnotation parent, int y, TextComponentAnnotation component)
+	public GuiAnnotationPopUp(Minecraft mc, GuiChatWithAnnotation parent, int y, TextComponentAnnotation component, int mouseX, int mouseY)
 	{
 		super();
 
@@ -46,6 +53,8 @@ public class GuiAnnotationPopUp extends Gui
 		this.buttonY = y - BUTTON_HEIGHT - 3*BUTTON_MARGIN;
 		this.dialogueActs = DialogueAct.getList();
 		this.component = component;
+		this.componentX = mouseX;
+		this.componentY = mouseY;
 		setupButtons();
 	}
 
@@ -54,7 +63,6 @@ public class GuiAnnotationPopUp extends Gui
      */
     public void drawPopup(int mouseX, int mouseY, float partialTicks)
     {
-    	//drawRect(0, 0, 400, 400, 0);
     	drawRect(BUTTON_FIRST_X - BUTTON_MARGIN,
     			buttonY - BUTTON_MARGIN,
     			BUTTON_FIRST_X + dialogueActs.size() * (BUTTON_WIDTH + BUTTON_MARGIN),
@@ -114,9 +122,18 @@ public class GuiAnnotationPopUp extends Gui
 		String msg = "[" + dialogueAct.getName() + "]" + component.toIdenticalString();
 		msg = StringTools.deleteIllegalCharacters(msg);
 
+		component.annotateByReceiver(dialogueAct);
+		component.toDefaultStyle();
+
 		parent.sendChatMessage(msg, false);
 
-		System.out.print("Annotated: " + dialogueAct);
+        if(this.mc.ingameGUI.getChatGUI() instanceof MyGuiNewChat)
+        {
+        	MyGuiNewChat guiNewChat = (MyGuiNewChat)this.mc.ingameGUI.getChatGUI();
+        	guiNewChat.replaceChatComponent(componentX, componentY, this.component);
+        }
+
+		ChatAnnotator.LOGGER.log(Level.INFO, "Annotated chat: [annotation]" + dialogueAct.getName() + ", [chat]" + component.getText());
 	}
 
 }

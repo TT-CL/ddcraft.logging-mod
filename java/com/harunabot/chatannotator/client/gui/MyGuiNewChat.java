@@ -6,14 +6,15 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ChatLine;
 import net.minecraft.client.gui.GuiNewChat;
-import net.minecraft.client.gui.GuiUtilRenderComponents;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -26,9 +27,7 @@ public class MyGuiNewChat extends GuiNewChat
 {
     private static final Logger LOGGER = LogManager.getLogger();
     private final Minecraft mc;
-    /**
-     *  GuiNewChat private fields
-     */
+    // GuiNewChat private fields------
     /** Chat lines to be displayed in the chat box */
     private List<ChatLine> chatLines = null;
     /** List of the ChatLines currently drawn */
@@ -50,11 +49,12 @@ public class MyGuiNewChat extends GuiNewChat
 		}
 		catch(NoSuchFieldException | IllegalAccessException e)
 		{
-			System.err.println("Failed to create MyGuiNewChat!");
+			System.err.println ("Failed to create MyGuiNewChat!");
 			e.printStackTrace();
 		}
 	}
 
+	// Override to use overridden setChatLine()
 	@Override
 	/**
      * prints the ChatComponent to Chat. If the ID is not 0, deletes an existing Chat Line of that ID from the GUI
@@ -65,6 +65,7 @@ public class MyGuiNewChat extends GuiNewChat
         LOGGER.info("[CHAT] {}", (Object)chatComponent.getUnformattedText().replaceAll("\r", "\\\\r").replaceAll("\n", "\\\\n"));
     }
 
+	// Override to use overridden setChatLine()
 	@Override
     public void refreshChat()
     {
@@ -132,7 +133,7 @@ public class MyGuiNewChat extends GuiNewChat
 		}
     }
 
-    public void setChatComponent(int mouseX, int mouseY, ITextComponent textcomponent)
+    public void replaceChatComponent(int mouseX, int mouseY, ITextComponent textcomponent)
     {
         if (!this.getChatOpen()) return;
 
@@ -160,22 +161,8 @@ public class MyGuiNewChat extends GuiNewChat
             if (!(i1 >= 0 && i1 < this.drawnChatLines.size())) return;
 
             ChatLine chatline = this.drawnChatLines.get(i1);
-            int j1 = 0;
 
-            for (ITextComponent itextcomponent : chatline.getChatComponent())
-            {
-            	System.out.println(itextcomponent.toString());
-                if (itextcomponent instanceof TextComponentString)
-                {
-                    j1 += this.mc.fontRenderer.getStringWidth(GuiUtilRenderComponents.removeTextColorsIfConfigured(((TextComponentString)itextcomponent).getText(), false));
-
-                    if (j1 > j)
-                    {
-                        //set
-                    	return;
-                    }
-                }
-            }
+            _replaceChatComponent(chatline.getChatLineID(), chatline.getUpdatedCounter(), textcomponent);
         }
 		catch(NoSuchFieldException | IllegalAccessException e)
 		{
@@ -183,4 +170,42 @@ public class MyGuiNewChat extends GuiNewChat
 			e.printStackTrace();
 		}
     }
+
+    private void _replaceChatComponent(int id, int counter, ITextComponent component)
+    {
+    	for (int i = this.chatLines.size() - 1; i >= 0; --i)
+		{
+		    ChatLine chatline = this.chatLines.get(i);
+		    if(chatline.getChatLineID() == id & chatline.getUpdatedCounter() == counter)
+		    {
+		    	this.chatLines.remove(i);
+		    	this.chatLines.add(i, new ChatLine(chatline.getUpdatedCounter(), replaceAnnotationComponent(chatline.getChatComponent(), component), chatline.getChatLineID()));
+		    	refreshChat();
+		    	return;
+		    }
+		}
+    }
+
+    private ITextComponent replaceAnnotationComponent(ITextComponent oldComponent, ITextComponent component)
+    {
+    	if (! (oldComponent instanceof TextComponentTranslation))
+    	{
+    		System.err.println("Failed to replace chatcomponent. Tried to replace non-TranslatableComponent:" + oldComponent.toString());
+    		return oldComponent;
+    	}
+
+    	TextComponentTranslation textComponentTranslation  = (TextComponentTranslation) oldComponent;
+    	Object[] args = textComponentTranslation.getFormatArgs();
+    	for (int i = 0; i<args.length; i++)
+    	{
+    		if(args[i] instanceof TextComponentAnnotation)
+    		{
+    			args[i] = component;
+    			break;
+    		}
+    	}
+
+    	return new TextComponentTranslation(textComponentTranslation.getKey(), args);
+    }
+
 }

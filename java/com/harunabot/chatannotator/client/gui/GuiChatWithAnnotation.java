@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Mouse;
 
+import com.harunabot.chatannotator.util.text.StringTools;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
 import com.harunabot.chatannotator.util.text.event.AnnotationClickEvent;
 
@@ -118,7 +119,6 @@ public class GuiChatWithAnnotation extends GuiChat
     	super.sendChatMessage(msg);
     }
 
-    // TODO: addToSentMessagesするときにアノテーションを取る
     // @Override
     public void sendChatMessage(String msg, boolean addToChat)
     {
@@ -126,6 +126,9 @@ public class GuiChatWithAnnotation extends GuiChat
         if (msg.isEmpty()) return;
         if (addToChat)
         {
+        	// Add message with no annotation
+        	String mainMsg = StringTools.separateBySymbols(msg, '<', '>').getRight();
+        	msg = (mainMsg != "") ? mainMsg : msg;
             this.mc.ingameGUI.getChatGUI().addToSentMessages(msg);
         }
         if (net.minecraftforge.client.ClientCommandHandler.instance.executeCommand(mc.player, msg) != 0) return;
@@ -136,7 +139,6 @@ public class GuiChatWithAnnotation extends GuiChat
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
     {
-        // System.out.println("Mouse.get: (" + Mouse.getX() + ", " + Mouse.getY() + "), mouse: (" + mouseX +", " + mouseY + ")");
         this.lastClickedX = mouseX;
         this.lastClickedY = mouseY;
 
@@ -183,10 +185,10 @@ public class GuiChatWithAnnotation extends GuiChat
     	{
         	return false;
         }
-        // Don't need AnnotationClickEvent instance; it's just for checking
+        // Note: Don't need AnnotationClickEvent instance; it's just for checking
 
         // Show GUI
-        this.annotationPopUp = new GuiAnnotationPopUp(mc, this, this.lastClickedY, (TextComponentAnnotation) component);
+        this.annotationPopUp = new GuiAnnotationPopUp(mc, this, this.lastClickedY, (TextComponentAnnotation) component, Mouse.getX(), Mouse.getY());
         // 多分リセットされてない
         // 描画し直す必要がある？
         // とりあえずアノテーションを優先
@@ -232,7 +234,6 @@ public class GuiChatWithAnnotation extends GuiChat
     			if(button.equals(popupButton))
     			{
     				this.annotationPopUp.annotateComponent(((GuiAnnotationButton)button).dialogueAct);
-    				// こっちか中身で結果を送信する
     				this.annotationPopUp = null;
     				return;
     			}

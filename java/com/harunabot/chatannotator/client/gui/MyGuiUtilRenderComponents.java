@@ -120,7 +120,6 @@ class MyGuiUtilRenderComponents extends GuiUtilRenderComponents
     {
     	ITextComponent component;
 
-    	// TODO: 変な文字を消す
     	if(baseComponent instanceof TextComponentAnnotation)
 		{
     		// TextComponentAnnotation

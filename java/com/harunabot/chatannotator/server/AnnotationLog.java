@@ -1,10 +1,13 @@
 package com.harunabot.chatannotator.server;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,67 +23,118 @@ import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
  */
 public class AnnotationLog
 {
+	protected static final String DIR_NAME = "annotationLogs";
+	protected static final String CHATLOG_BASE_FNAME = "chatLog_";
+	protected static final String ANNOTATION_BASE_FNAME= "annotation_";
+
 	private final String logFilePath;
-	//private Map<String, TextComponentAnnotation> components;
+	private final String annotationFilePath;
+	/** All Chats */
+	private List<TextComponentAnnotation> components;
+	/** Annotated chats */
 	private Map<String, TextComponentAnnotation> annotatedComponents;
+	/** Unannotated chats */
 	private List<TextComponentAnnotation> unAnnotatedComponents;
 
 
-	public AnnotationLog(String logFilePath)
+
+
+	public AnnotationLog()
 	{
-		this.logFilePath = logFilePath;
-//		this.components = new HashMap<>();
+		// TODO: separate by world
+		String date = new SimpleDateFormat("yy-MM-dd_HH.mm.ss").format(new Date());
+		this.logFilePath = DIR_NAME + "/" +  CHATLOG_BASE_FNAME + date + ".log";
+		this.annotationFilePath = DIR_NAME + "/" + ANNOTATION_BASE_FNAME + date + ".json";
+
+		this.components = new ArrayList<>();
 		this.annotatedComponents = new HashMap<>();
 		this.unAnnotatedComponents = new ArrayList<>();
+
+		// Make output file
+		createOutputFile(DIR_NAME, logFilePath);
 	}
 
-	// TODO: should write one by one
+	/**
+	 * Create output file for log
+	 */
+	protected static void createOutputFile(String directoryName, String filePath)
+	{
+		File dir = new File(directoryName);
+        File file = new File(filePath);
+        try {
+        	if(!dir.exists()) dir.mkdir();
+            file.createNewFile();
+            ChatAnnotator.LOGGER.log(Level.INFO, "Successfully created output file: " + filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+	}
+
 	public void addNewChat(TextComponentAnnotation component)
 	{
+		components.add(component);
 		unAnnotatedComponents.add(component);
 
-
-//		addComponent(component);
-//
-//		Map<String, String> outputMap = new HashMap<>();
-//		for(String key: this.components.keySet())
-//		{
-//			outputMap.put(key, components.get(key).toLogString());
-//		}
-//
-//		PrintWriter pw = null;
-//		try {
-//			FileWriter fw = new FileWriter(logFilePath, true);
-//			pw= new PrintWriter(new BufferedWriter(fw)) ;
-//			pw.println(outputMap.toString());
-//			pw.close();
-//			ChatAnnotator.LOGGER.log(Level.INFO, "Output file.");
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}finally {
-//            if (pw != null) {
-//                pw.close();
-//            }
-//		}
+		String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
+		String output = time + " :[CHAT] " + component.toLogString();
+		writeFile(output, logFilePath, "");
 	}
 
-	public void outputFile()
+	public void outputAnnotationFile()
 	{
-		System.out.println(this.unAnnotatedComponents);
-
-		Map<String, String> outputMap = new HashMap<>();
-		for(String key: this.annotatedComponents.keySet())
+		File outputFile = new File(annotationFilePath);
+		if(!outputFile.exists())
 		{
-			outputMap.put(key, annotatedComponents.get(key).toLogString());
+			createOutputFile(DIR_NAME, annotationFilePath);
 		}
 
+		Map<String, List<String>> outputMap = new HashMap<>();
+		for(TextComponentAnnotation component: components)
+		{
+			String key = component.getTime();
+			if(!outputMap.containsKey(key))
+			{
+				outputMap.put(key, new ArrayList<>());
+			}
+			outputMap.get(key).add(component.toLogString());
+		}
+
+		writeFile(outputMap.toString(), annotationFilePath, "Output file.");
+	}
+
+
+	public void annotateChat(DialogueAct annotation, String identicalString)
+	{
+		for(TextComponentAnnotation component: this.unAnnotatedComponents)
+		{
+			if(component.toIdenticalString().equals(identicalString))
+			{
+				component.annotateByReceiver(annotation);
+				this.unAnnotatedComponents.remove(component);
+				this.annotatedComponents.put(component.getTime(), component);
+
+				String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
+				String output = time + " :[ANNOTATION] " + annotation.getName() +  "=>" + component.toLogString();
+				writeFile(output, logFilePath, "");
+				break;
+			}
+		}
+
+		// TODO; give score
+	}
+
+	protected void writeFile(String output, String filePath, String successLog)
+	{
 		PrintWriter pw = null;
 		try {
-			FileWriter fw = new FileWriter(logFilePath, true);
+			FileWriter fw = new FileWriter(filePath, true);
 			pw= new PrintWriter(new BufferedWriter(fw)) ;
-			pw.println(outputMap.toString());
+			pw.println(output);
 			pw.close();
-			ChatAnnotator.LOGGER.log(Level.INFO, "Output file.");
+			if(!successLog.isEmpty())
+			{
+				ChatAnnotator.LOGGER.log(Level.INFO, successLog);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}finally {
@@ -88,27 +142,5 @@ public class AnnotationLog
                 pw.close();
             }
 		}
-	}
-
-
-	public void annotateChat(DialogueAct annotation, String identicalString)
-	{
-		System.out.println("Annoation: " + annotation);
-
-		for(TextComponentAnnotation component: this.unAnnotatedComponents)
-		{
-			System.out.println(identicalString + ", " + component.toIdenticalString());
-			if(component.toIdenticalString().equals(identicalString))
-			{
-				System.out.println("matched!");
-				component.annotateByReceiver(annotation);
-				this.unAnnotatedComponents.remove(component);
-				this.annotatedComponents.put(component.getTime(), component);
-				System.out.println(unAnnotatedComponents.toString());
-				System.out.println(annotatedComponents.toString());
-				break;
-			}
-		}
-		// TODO; give score
 	}
 }

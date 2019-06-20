@@ -30,7 +30,7 @@ public class TextComponentAnnotation extends TextComponentString
 
 	private final int PARAM_NUM = 5;
 
-	// TODO: sendername
+	// FIXME: should contain sendername?
     public TextComponentAnnotation(String msg, DialogueAct senderAnnotation, UUID senderId)
     {
     	this(msg,senderAnnotation, null, senderId.toString(), new SimpleDateFormat("HH:mm:ss").format(new Date()));
@@ -113,12 +113,10 @@ public class TextComponentAnnotation extends TextComponentString
     public void toProperStyle(UUID receiverId)
     {
     	// Sender -> default
-    	/*
     	if(receiverId.toString().equals(senderId)) {
     		this.toDefaultStyle();
     		return;
     	}
-    	*/
 
     	// Receiver -> AnnotationClickEvent, color = YELLOW, underlined
     	Style newStyle = this.getStyle();
@@ -130,10 +128,7 @@ public class TextComponentAnnotation extends TextComponentString
 
     public void toDefaultStyle()
     {
-    	// white, no other style
-		Style style = this.getStyle();
-		style.setColor(TextFormatting.WHITE);
-		style.setClickEvent(null);
+    	this.setStyle(new Style());
     }
 
 	@Override

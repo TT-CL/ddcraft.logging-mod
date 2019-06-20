@@ -2,15 +2,15 @@ package com.harunabot.chatannotator.util.handlers;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.UUID;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 
 import com.harunabot.chatannotator.ChatAnnotator;
 import com.harunabot.chatannotator.client.gui.DialogueAct;
 import com.harunabot.chatannotator.server.AnnotationLog;
+import com.harunabot.chatannotator.util.text.StringTools;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
 
 import net.minecraft.client.Minecraft;
@@ -29,29 +29,22 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 @Mod.EventBusSubscriber
 public class AnnotationHandler
 {
-	private static final String DIR_NAME = "annotationLogs";
 	private static final String CHAT_KEY = "chat.type.text";
 
-	public static AnnotationLog annotationLog;
+	public static AnnotationLog annotationLog = null;
 
 	public static void preInit(FMLPreInitializationEvent event)
 	{
-		// Make output file
-		// TODO: separate by world
-		String date = new SimpleDateFormat("yy-MM-dd_HH.mm.ss").format(new Date());
-		String filePath = DIR_NAME + "/chatLog_" + date + ".log";
-		createOutputFile(DIR_NAME, filePath);
-
 		// Initialize logger
-		annotationLog = new AnnotationLog(filePath);
+		annotationLog = new AnnotationLog();
 	}
 
 	@SubscribeEvent
 	public static void onFinishGame(WorldEvent.Unload event)
 	{
-		if(event.getWorld().isRemote) return;
+		if(event.getWorld().isRemote | annotationLog == null) return;
 
-		annotationLog.outputFile();
+		annotationLog.outputAnnotationFile();
 	}
 
 	public static void init(FMLInitializationEvent event)
@@ -64,7 +57,8 @@ public class AnnotationHandler
 
 	/**
 	 * Change chat message to TextComponentAnnotation
-	 * and take log?
+	 * or apply annotation
+	 * and take log
 	 */
 	@SubscribeEvent
 	public static void onServerChat(ServerChatEvent event)
@@ -93,6 +87,7 @@ public class AnnotationHandler
 
 	/**
 	 * Checks if serverEvent is valid for annotation chat
+	 * @return ComponentElements if valid component
 	 */
 	private static ComponentElements validateServerChat(ITextComponent component)
 	{
@@ -118,9 +113,6 @@ public class AnnotationHandler
 	@SubscribeEvent
 	public static void onReceivedClientChat(ClientChatReceivedEvent event)
 	{
-		//TEMP
-		//ChatAnnotator.LOGGER.log(Level.INFO, event.getMessage().toString());
-
 		if(!(event.getMessage() instanceof TextComponentTranslation)) return;
 
 		TextComponentTranslation component = (TextComponentTranslation) event.getMessage();
@@ -138,6 +130,8 @@ public class AnnotationHandler
 		// Set chat to proper style based on the sender/receiver
 		UUID receiverId = Minecraft.getMinecraft().player.getUniqueID();
 		msgComponent.toProperStyle(receiverId);
+
+		System.out.println(msgComponent.getFormattedText());
 
 		args[1] = msgComponent;
 		event.setMessage(new TextComponentTranslation(component.getKey(), args));
@@ -194,29 +188,23 @@ public class AnnotationHandler
 	 */
 	private static TextComponentString createAnnotatedChat(TextComponentString msgComponent, UUID senderId)
 	{
-		// Separate the message into the annoation part & main part
+		// Separate the message into the annotation part & main part
 		String rawMsg = msgComponent.getText();
-		String msg; //= rawMsg.substring(rawMsg.indexOf("+") + 1);
-		String annotationStr;
+		Pair<String, String> separatedMsg = StringTools.separateBySymbols(rawMsg, '<', '>');
+		String annotationStr = separatedMsg.getLeft();
+		String msg = separatedMsg.getRight();
 		DialogueAct annotation;
-		try
-		{
-			msg = rawMsg.substring(rawMsg.indexOf(">") + 1);
-			annotationStr = rawMsg.substring(1,rawMsg.indexOf(">"));
-		}
-		catch (IndexOutOfBoundsException e)
-		{
-			return null;
-		}
 
 		// Resolve annotation
 		annotation = DialogueAct.convertFromName(annotationStr);
 		if (annotation == null)
 		{
+			ChatAnnotator.LOGGER.log(Level.ERROR, "Something wrong with the chat msg: " + rawMsg);
 			return null;
 		}
 
 		TextComponentAnnotation annotatedChat = new TextComponentAnnotation(msg, annotation, senderId);
+
 		// Take log
 		addNewChat(annotatedChat);
 
@@ -225,17 +213,12 @@ public class AnnotationHandler
 
 	public static void onAnnotatedChat(String rawMsg)
 	{
-		String annotationStr;
-		String identicalString;
-		DialogueAct annotation;
-		try
-		{
-			identicalString = rawMsg.substring(rawMsg.indexOf("]") + 1);
-			annotationStr = rawMsg.substring(1,rawMsg.indexOf("]"));
-			annotation = DialogueAct.convertFromName(annotationStr);
-			if(annotation == null) throw new IllegalArgumentException();
-		}
-		catch (IndexOutOfBoundsException|IllegalArgumentException e)
+		Pair<String, String> separatedMsg = StringTools.separateBySymbols(rawMsg, '[', ']');
+		String annotationStr = separatedMsg.getLeft();
+		String identicalString = separatedMsg.getRight();
+
+		DialogueAct annotation = DialogueAct.convertFromName(annotationStr);
+		if (annotation == null)
 		{
 			ChatAnnotator.LOGGER.log(Level.ERROR, "Something wrong with the annotation msg: " + rawMsg);
 			return;

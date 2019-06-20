@@ -1,5 +1,7 @@
 package com.harunabot.chatannotator.util.text;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 public class StringTools
 {
     public static String printAllCharacters(String str)
@@ -31,4 +33,28 @@ public class StringTools
 
     	return ret;
     }
+
+    /**
+     * Separate the String into 2 parts: one surrounded by symbols, and the other after that
+     */
+    public static Pair<String, String> separateBySymbols(String str, char firstSymbol, char secondSymbol)
+    {
+    	String first;
+    	String second;
+
+		try
+		{
+			first = str.substring(str.indexOf(firstSymbol) + 1, str.indexOf(secondSymbol));
+			second = str.substring(str.indexOf(secondSymbol) + 1);
+		}
+		catch (IndexOutOfBoundsException e)
+		{
+			System.err.println(e);
+			first = "";
+			second = "";
+		}
+
+    	return Pair.of(first, second);
+    }
+
 }
