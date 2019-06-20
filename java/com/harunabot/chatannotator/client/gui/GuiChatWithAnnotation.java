@@ -128,8 +128,8 @@ public class GuiChatWithAnnotation extends GuiChat
         {
         	// Add message with no annotation
         	String mainMsg = StringTools.separateBySymbols(msg, '<', '>').getRight();
-        	msg = (mainMsg != "") ? mainMsg : msg;
-            this.mc.ingameGUI.getChatGUI().addToSentMessages(msg);
+        	mainMsg = (mainMsg != "") ? mainMsg : msg;
+            this.mc.ingameGUI.getChatGUI().addToSentMessages(mainMsg);
         }
         if (net.minecraftforge.client.ClientCommandHandler.instance.executeCommand(mc.player, msg) != 0) return;
 

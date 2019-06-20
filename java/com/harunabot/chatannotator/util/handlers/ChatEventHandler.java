@@ -27,7 +27,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 @Mod.EventBusSubscriber
-public class AnnotationHandler
+public class ChatEventHandler
 {
 	private static final String CHAT_KEY = "chat.type.text";
 
@@ -39,20 +39,20 @@ public class AnnotationHandler
 		annotationLog = new AnnotationLog();
 	}
 
-	@SubscribeEvent
-	public static void onFinishGame(WorldEvent.Unload event)
-	{
-		if(event.getWorld().isRemote | annotationLog == null) return;
-
-		annotationLog.outputAnnotationFile();
-	}
-
 	public static void init(FMLInitializationEvent event)
 	{
 	}
 
 	public static void postInit(FMLPostInitializationEvent event)
 	{
+	}
+
+	@SubscribeEvent
+	public static void onFinishGame(WorldEvent.Unload event)
+	{
+		if(event.getWorld().isRemote | annotationLog == null) return;
+
+		annotationLog.outputAnnotationFile();
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class AnnotationHandler
 	public static void onServerChat(ServerChatEvent event)
 	{
 		ITextComponent component = event.getComponent();
-		AnnotationHandler.ComponentElements elements = validateServerChat(component);
+		ChatEventHandler.ComponentElements elements = validateServerChat(component);
 		if(elements == null) return;
 
 		// Sender's UUID
@@ -103,7 +103,7 @@ public class AnnotationHandler
 			return null;
 		}
 
-		return new AnnotationHandler.ComponentElements(args, msgComponent);
+		return new ChatEventHandler.ComponentElements(args, msgComponent);
 	}
 
 	/**
