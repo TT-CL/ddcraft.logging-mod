@@ -1,8 +1,8 @@
 package com.harunabot.chatannotator.client.gui;
 
-import java.lang.reflect.Field;
 import java.util.List;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,6 +15,9 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.relauncher.ReflectionHelper.UnableToAccessFieldException;
+import net.minecraftforge.fml.relauncher.ReflectionHelper.UnableToFindFieldException;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -33,6 +36,12 @@ public class MyGuiNewChat extends GuiNewChat
     /** List of the ChatLines currently drawn */
     private List<ChatLine> drawnChatLines = null;
 
+    // field index for Reflections
+    protected static final int CHATLINES_FIELD_INDEX = 3;
+    protected static final int DRAWNCHATLINES_FIELD_INDEX = 4;
+    protected static final int SCROLLPOS_FIELD_INDEX = 5;
+    protected static final int ISSCROLLED_FIELD_INDEX = 6;
+
 	public MyGuiNewChat(Minecraft mcIn)
 	{
 		super(mcIn);
@@ -40,16 +49,12 @@ public class MyGuiNewChat extends GuiNewChat
 
 		// Reflect GuiNewChat private fields---------------------------
 		try {
-			Field chatLinesField = GuiNewChat.class.getDeclaredField("chatLines");
-			Field drawnChatLinesField = GuiNewChat.class.getDeclaredField("drawnChatLines");
-			chatLinesField.setAccessible(true);
-			drawnChatLinesField.setAccessible(true);
-			this.chatLines = (List<ChatLine>) chatLinesField.get(this);
-			this.drawnChatLines = (List<ChatLine>) drawnChatLinesField.get(this);
+			this.chatLines = ObfuscationReflectionHelper.getPrivateValue(GuiNewChat.class, this, CHATLINES_FIELD_INDEX);
+			this.drawnChatLines = ObfuscationReflectionHelper.getPrivateValue(GuiNewChat.class, this, DRAWNCHATLINES_FIELD_INDEX);
 		}
-		catch(NoSuchFieldException | IllegalAccessException e)
+		catch(UnableToFindFieldException | UnableToAccessFieldException e)
 		{
-			System.err.println ("Failed to create MyGuiNewChat!");
+			LOGGER.log(Level.ERROR, "Reflection Error: Failed to create MyGuiNewChat!");
 			e.printStackTrace();
 		}
 	}
@@ -83,12 +88,7 @@ public class MyGuiNewChat extends GuiNewChat
     {
     	try {
 			// Reflect GuiNewChat private fields--------------------------------------------
-	    	Field scrollPosField = GuiNewChat.class.getDeclaredField("scrollPos");
-	    	Field isScrolledField = GuiNewChat.class.getDeclaredField("isScrolled");
-			scrollPosField.setAccessible(true);
-			isScrolledField.setAccessible(true);
-		    int scrollPos = (int) scrollPosField.get(this);
-
+    		int scrollPos = ObfuscationReflectionHelper.getPrivateValue(GuiNewChat.class, this, SCROLLPOS_FIELD_INDEX);
 
 			// GuiNewChat.setChatLine--------------------------------------------------------
 	        if (chatLineId != 0)
@@ -104,7 +104,7 @@ public class MyGuiNewChat extends GuiNewChat
 	        {
 	            if (flag && scrollPos > 0)
 	            {
-	                isScrolledField.set(this, true); //this.isScrolled = true;
+	            	ObfuscationReflectionHelper.setPrivateValue(GuiNewChat.class, this, true, ISSCROLLED_FIELD_INDEX); //this.isScrolled = true;
 	                this.scroll(1);
 	            }
 
@@ -126,9 +126,9 @@ public class MyGuiNewChat extends GuiNewChat
 	            }
 	        }
 		}
-		catch(NoSuchFieldException | IllegalAccessException e)
+		catch(UnableToFindFieldException | UnableToAccessFieldException e)
 		{
-			System.err.println("Failed to execute MyGuiNewChat.setChatLine!");
+			LOGGER.log(Level.ERROR, "Reflection Error: Failed to execute MyGuiNewChat.setChatLine!");
 			e.printStackTrace();
 		}
     }
@@ -139,9 +139,8 @@ public class MyGuiNewChat extends GuiNewChat
 
     	try {
 			// Reflect GuiNewChat private fields
-	    	Field scrollPosField = GuiNewChat.class.getDeclaredField("scrollPos");
-			scrollPosField.setAccessible(true);
-		    int scrollPos = (int) scrollPosField.get(this);
+    		int scrollPos = ObfuscationReflectionHelper.getPrivateValue(GuiNewChat.class, this, SCROLLPOS_FIELD_INDEX);
+
 		    // Local fields
             ScaledResolution scaledresolution = new ScaledResolution(this.mc);
             int i = scaledresolution.getScaleFactor();
@@ -164,9 +163,9 @@ public class MyGuiNewChat extends GuiNewChat
 
             _replaceChatComponent(chatline.getChatLineID(), chatline.getUpdatedCounter(), textcomponent);
         }
-		catch(NoSuchFieldException | IllegalAccessException e)
+		catch(UnableToFindFieldException | UnableToAccessFieldException e)
 		{
-			System.err.println("Failed to create MyGuiNewChat!");
+			LOGGER.log(Level.ERROR, "Reflection Error: Failed to replace chat component");
 			e.printStackTrace();
 		}
     }
@@ -190,7 +189,7 @@ public class MyGuiNewChat extends GuiNewChat
     {
     	if (! (oldComponent instanceof TextComponentTranslation))
     	{
-    		System.err.println("Failed to replace chatcomponent. Tried to replace non-TranslatableComponent:" + oldComponent.toString());
+    		LOGGER.log(Level.ERROR, "Failed to replace chatcomponent. Tried to replace non-TranslatableComponent:" + oldComponent.toString());
     		return oldComponent;
     	}
 

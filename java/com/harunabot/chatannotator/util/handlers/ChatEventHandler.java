@@ -131,8 +131,6 @@ public class ChatEventHandler
 		UUID receiverId = Minecraft.getMinecraft().player.getUniqueID();
 		msgComponent.toProperStyle(receiverId);
 
-		System.out.println(msgComponent.getFormattedText());
-
 		args[1] = msgComponent;
 		event.setMessage(new TextComponentTranslation(component.getKey(), args));
 	}
