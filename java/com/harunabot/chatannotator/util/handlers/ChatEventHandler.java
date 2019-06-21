@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Level;
 
 import com.harunabot.chatannotator.ChatAnnotator;
 import com.harunabot.chatannotator.client.gui.DialogueAct;
+import com.harunabot.chatannotator.event.AnnotationEvent;
 import com.harunabot.chatannotator.server.AnnotationLog;
 import com.harunabot.chatannotator.util.text.StringTools;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
@@ -53,6 +54,12 @@ public class ChatEventHandler
 		if(event.getWorld().isRemote | annotationLog == null) return;
 
 		annotationLog.outputAnnotationFile();
+	}
+
+	@SubscribeEvent
+	public static void onAnnotationEvent(AnnotationEvent event)
+	{
+		System.out.println("Annotated! Matched:" + event.isAnnotationMatched() + ", sender=" + event.getSenderAnnotation() + ", receiver=" + event.getReceiverAnnotation());
 	}
 
 	/**

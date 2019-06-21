@@ -65,7 +65,7 @@ public class TextComponentAnnotation extends TextComponentString
     	catch (Exception e)
     	{
     		System.out.println(e);
-    		ChatAnnotator.LOGGER.log(Level.ERROR, "TextComponentAnnotation::invalid componentString : " + component.toString());
+    		ChatAnnotator.LOGGER.log(Level.ERROR, "TextComponentAnnotation::invalid componentString : " + component);
     		this.senderAnnotation = null;
     		this.receiverAnnotation = null;
     		this.senderId = "";
@@ -103,6 +103,16 @@ public class TextComponentAnnotation extends TextComponentString
     public String getTime()
     {
     	return this.time;
+    }
+
+    public DialogueAct getSenderAnnotation()
+    {
+    	return this.senderAnnotation;
+    }
+
+    public DialogueAct getReceiverAnnotation()
+    {
+    	return this.receiverAnnotation;
     }
 
     public boolean isAnnotated()

@@ -12,10 +12,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.apache.logging.log4j.Level;
 
 import com.harunabot.chatannotator.ChatAnnotator;
 import com.harunabot.chatannotator.client.gui.DialogueAct;
+import com.harunabot.chatannotator.common.ChatAnnotatorHooks;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
 
 /**
@@ -103,24 +106,32 @@ public class AnnotationLog
 	}
 
 
+	@Nullable
 	public void annotateChat(DialogueAct annotation, String identicalString)
 	{
 		for(TextComponentAnnotation component: this.unAnnotatedComponents)
 		{
 			if(component.toIdenticalString().equals(identicalString))
 			{
-				component.annotateByReceiver(annotation);
+				// AnnotationEvent
+				TextComponentAnnotation annotatedComponent = component.createCopy(); // create copy to protect original component
+				annotatedComponent.annotateByReceiver(annotation);
+				annotatedComponent = ChatAnnotatorHooks.onAnnotationEvent(annotatedComponent);
+				if(annotatedComponent == null)
+				{
+					return;
+				}
+
 				this.unAnnotatedComponents.remove(component);
-				this.annotatedComponents.put(component.getTime(), component);
+				this.annotatedComponents.put(annotatedComponent.getTime(), annotatedComponent);
 
 				String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
-				String output = time + " :[ANNOTATION] " + annotation.getName() +  "=>" + component.toLogString();
+				String output = time + " :[ANNOTATION] " + annotation.getName() +  "=>" + annotatedComponent.toLogString();
 				writeFile(output, logFilePath, "");
+
 				break;
 			}
 		}
-
-		// TODO; give score
 	}
 
 	protected void writeFile(String output, String filePath, String successLog)
