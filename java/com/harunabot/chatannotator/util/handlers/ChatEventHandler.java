@@ -14,6 +14,7 @@ import com.harunabot.chatannotator.util.text.StringTools;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -73,7 +74,7 @@ public class ChatEventHandler
 		if(isAnnotation(elements.msgComponent))
 		{
 			// Annotate
-			onAnnotatedChat(elements.msgComponent.getText());
+			onAnnotatedChat(elements.msgComponent.getText(), event.getPlayer());
 			event.setCanceled(true);
 			return;
 		}
@@ -209,7 +210,7 @@ public class ChatEventHandler
 		return annotatedChat.toComponentString();
 	}
 
-	public static void onAnnotatedChat(String rawMsg)
+	public static void onAnnotatedChat(String rawMsg, EntityPlayerMP player)
 	{
 		Pair<String, String> separatedMsg = StringTools.separateBySymbols(rawMsg, '[', ']');
 		String annotationStr = separatedMsg.getLeft();
@@ -222,7 +223,7 @@ public class ChatEventHandler
 			return;
 		}
 
-		annotationLog.annotateChat(annotation, identicalString);
+		annotationLog.annotateChat(annotation, identicalString, player);
 	}
 
 	/**

@@ -21,6 +21,8 @@ import com.harunabot.chatannotator.client.gui.DialogueAct;
 import com.harunabot.chatannotator.common.ChatAnnotatorHooks;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
 
+import net.minecraft.entity.player.EntityPlayerMP;
+
 /**
  * record chat annotation logs
  */
@@ -107,7 +109,7 @@ public class AnnotationLog
 
 
 	@Nullable
-	public void annotateChat(DialogueAct annotation, String identicalString)
+	public void annotateChat(DialogueAct annotation, String identicalString, EntityPlayerMP player)
 	{
 		for(TextComponentAnnotation component: this.unAnnotatedComponents)
 		{
@@ -116,14 +118,15 @@ public class AnnotationLog
 				// AnnotationEvent
 				TextComponentAnnotation annotatedComponent = component.createCopy(); // create copy to protect original component
 				annotatedComponent.annotateByReceiver(annotation);
-				annotatedComponent = ChatAnnotatorHooks.onAnnotationEvent(annotatedComponent);
+				annotatedComponent = ChatAnnotatorHooks.onAnnotationEvent(annotatedComponent, player);
 				if(annotatedComponent == null)
 				{
 					return;
 				}
 
+				component = annotatedComponent;
 				this.unAnnotatedComponents.remove(component);
-				this.annotatedComponents.put(annotatedComponent.getTime(), annotatedComponent);
+				this.annotatedComponents.put(component.getTime(), component);
 
 				String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
 				String output = time + " :[ANNOTATION] " + annotation.getName() +  "=>" + annotatedComponent.toLogString();

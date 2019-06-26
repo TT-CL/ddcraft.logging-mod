@@ -5,6 +5,7 @@ import com.harunabot.chatannotator.common.ChatAnnotatorHooks;
 import com.harunabot.chatannotator.util.handlers.ChatEventHandler;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.client.CPacketChatMessage;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
@@ -31,10 +32,13 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 public class AnnotationEvent extends Event
 {
 	private final TextComponentAnnotation component;
-    public AnnotationEvent(TextComponentAnnotation component)
+	private final EntityPlayerMP player;
+
+    public AnnotationEvent(TextComponentAnnotation component, EntityPlayerMP player)
     {
         super();
         this.component = component;
+        this.player = player;
     }
 
     public boolean isAnnotationMatched()
@@ -45,6 +49,11 @@ public class AnnotationEvent extends Event
     public String getMessage()
     {
     	return this.component.getText();
+    }
+
+    public EntityPlayerMP getPlayer()
+    {
+    	return this.player;
     }
 
     public DialogueAct getSenderAnnotation()
