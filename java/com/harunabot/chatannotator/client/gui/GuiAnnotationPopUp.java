@@ -1,7 +1,9 @@
 package com.harunabot.chatannotator.client.gui;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.Level;
 
@@ -37,25 +39,106 @@ public class GuiAnnotationPopUp extends Gui
     protected final int componentX;
     protected final int componentY;
 
+    /** base position(clicked position) */
+    private int baseX;
+	private int baseY;
+
+	/** base position for buttons */
+	private int buttonX;
 	private int buttonY;
-	private final int BUTTON_FIRST_X = 5;
-	private final int BUTTON_MARGIN = 3;
+
+	/** position of popup rects*/
+	protected Map<String, Integer> mainPos;
+	protected Map<String, Integer> middlePos;
+	protected Map<String, Integer> edgePos;
+
+	private static final int BUTTON_MARGIN = 3;
+	private static final int MIN_BUTTON_LEFT = 5;
 	private static final int BUTTON_WIDTH = GuiAnnotationButton.WIDTH;
 	private static final int BUTTON_HEIGHT = GuiAnnotationButton.HEIGHT;
 	private static final int BUTTON_FIRST_ID = 100;
 
-	public GuiAnnotationPopUp(Minecraft mc, GuiChatWithAnnotation parent, int y, TextComponentAnnotation component, int mouseX, int mouseY)
+	private static final int BACKGROUND_COLOR = 0xeeffffff; //white, opacity = 100
+	private static final int EDGERECT_WIDTH = 10;
+	private static final int EDGERECT_HEIGHT = 6;
+
+
+	public GuiAnnotationPopUp(Minecraft mc, GuiChatWithAnnotation parent, int clickedX, int clickedY, TextComponentAnnotation component, int mouseX, int mouseY)
 	{
 		super();
 
 		this.mc = mc;
 		this.parent = parent;
-		this.buttonY = y - BUTTON_HEIGHT - 3*BUTTON_MARGIN;
+
+		this.baseX = clickedX;
+		this.baseY = clickedY - (/*2 */ BUTTON_MARGIN);
+
 		this.dialogueActs = DialogueAct.getList();
 		this.component = component;
 		this.componentX = mouseX;
 		this.componentY = mouseY;
-		setupButtons();
+
+		// init buttons
+		setupButtons(this.baseX, this.baseY);
+		// init rectangles
+		setupRects(this.baseX, this.baseY, this.buttonX, this.buttonY);
+
+		changeComponentColor(true);
+	}
+
+	private void setupButtons(int baseX, int baseY)
+	{
+		int length = (BUTTON_WIDTH + BUTTON_MARGIN) * dialogueActs.size() - BUTTON_MARGIN;
+		int minRight = baseX + EDGERECT_WIDTH;
+
+		this.buttonY = baseY - (EDGERECT_HEIGHT * 2) - (BUTTON_MARGIN * 3) - BUTTON_HEIGHT;
+		this.buttonX = (baseX - length/2 < MIN_BUTTON_LEFT) ? MIN_BUTTON_LEFT : baseX - length/2;
+		buttonX = (buttonX + length/2 < minRight) ? minRight - length/2 : buttonX;
+
+		int x = buttonX;
+
+		for(DialogueAct action: dialogueActs)
+		{
+			this.buttonList.add(
+				new GuiAnnotationButton(BUTTON_FIRST_ID + action.getId(), x, buttonY, action)
+			);
+			x += BUTTON_WIDTH + BUTTON_MARGIN;
+		}
+	}
+
+	protected void setupRects(int baseX, int baseY, int buttonX, int buttonY)
+	{
+		// main
+		int mainLeft = buttonX - BUTTON_MARGIN;
+		int mainRight = buttonX + dialogueActs.size() * (BUTTON_WIDTH + BUTTON_MARGIN);
+		int mainBottom = buttonY + BUTTON_HEIGHT + BUTTON_MARGIN;
+		int mainTop = buttonY - BUTTON_MARGIN;
+		this.mainPos = getPosMap(mainLeft, mainTop, mainRight, mainBottom);
+
+		// edge
+		int edgeLeft = baseX - EDGERECT_WIDTH/2;
+		int edgeRight = baseX + EDGERECT_WIDTH/2;
+		int edgeBottom = baseY;
+		int edgeTop = edgeBottom - EDGERECT_HEIGHT;
+		this.edgePos = getPosMap(edgeLeft, edgeTop, edgeRight, edgeBottom);
+
+		// middle
+		int middleLeft = baseX - EDGERECT_WIDTH;
+		int middleRight = baseX + EDGERECT_WIDTH;
+		int middleBottom = edgeTop - BUTTON_MARGIN;
+		int middleTop = middleBottom - EDGERECT_HEIGHT;
+		this.middlePos = getPosMap(middleLeft, middleTop, middleRight, middleBottom);
+	}
+
+	private Map<String, Integer> getPosMap(int left, int top, int right, int bottom)
+	{
+		Map<String, Integer> map = new HashMap<>();
+		map.put("left", left);
+		map.put("top", top);
+		map.put("right", right);
+		map.put("bottom", bottom);
+
+		return map;
 	}
 
     /**
@@ -63,30 +146,18 @@ public class GuiAnnotationPopUp extends Gui
      */
     public void drawPopup(int mouseX, int mouseY, float partialTicks)
     {
-    	drawRect(BUTTON_FIRST_X - BUTTON_MARGIN,
-    			buttonY - BUTTON_MARGIN,
-    			BUTTON_FIRST_X + dialogueActs.size() * (BUTTON_WIDTH + BUTTON_MARGIN),
-    			buttonY + BUTTON_HEIGHT + BUTTON_MARGIN,
-    			0x7d333333
-    			);
+    	// main Popup
+    	drawRect(mainPos.get("left"), mainPos.get("top"), mainPos.get("right"), mainPos.get("bottom"), BACKGROUND_COLOR);
+
+    	// sub
+    	drawRect(edgePos.get("left"), edgePos.get("top"), edgePos.get("right"), edgePos.get("bottom"), BACKGROUND_COLOR);
+    	drawRect(middlePos.get("left"), middlePos.get("top"), middlePos.get("right"), middlePos.get("bottom"), BACKGROUND_COLOR);
 
         for (int i = 0; i < this.buttonList.size(); ++i)
         {
             ((GuiButton)this.buttonList.get(i)).drawButton(this.mc, mouseX, mouseY, partialTicks);
         }
     }
-
-	private void setupButtons()
-	{
-		int buttonX = BUTTON_FIRST_X;
-		for(DialogueAct action: dialogueActs)
-		{
-			this.buttonList.add(
-				new GuiAnnotationButton(BUTTON_FIRST_ID + action.getId(), buttonX, buttonY, action)
-			);
-			buttonX += GuiAnnotationButton.WIDTH + BUTTON_MARGIN;
-		}
-	}
 
 	public List<GuiButton> getButtons()
 	{
@@ -113,6 +184,17 @@ public class GuiAnnotationPopUp extends Gui
 
                 return;
             }
+        }
+        changeComponentColor(false);
+	}
+
+	private void changeComponentColor(Boolean annotating)
+	{
+        if(this.mc.ingameGUI.getChatGUI() instanceof MyGuiNewChat)
+        {
+        	MyGuiNewChat guiNewChat = (MyGuiNewChat)this.mc.ingameGUI.getChatGUI();
+        	this.component.changeColor(annotating);
+        	guiNewChat.replaceChatComponent(componentX, componentY, this.component);
         }
 	}
 

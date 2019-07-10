@@ -124,7 +124,7 @@ public class AnnotationLog
 					return;
 				}
 
-				component = annotatedComponent;
+				component.annotateByReceiver(annotatedComponent.getReceiverAnnotation());
 				this.unAnnotatedComponents.remove(component);
 				this.annotatedComponents.put(component.getTime(), component);
 

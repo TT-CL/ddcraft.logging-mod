@@ -136,6 +136,19 @@ public class TextComponentAnnotation extends TextComponentString
     	this.setStyle(newStyle);
     }
 
+    public void changeColor(Boolean annotating)
+    {
+    	Style style = this.getStyle();
+    	if(annotating)
+    	{
+    		style.setColor(TextFormatting.AQUA);
+    	}
+    	else
+    	{
+    		style.setColor(TextFormatting.YELLOW);
+    	}
+    }
+
     public void toDefaultStyle()
     {
     	this.setStyle(new Style());

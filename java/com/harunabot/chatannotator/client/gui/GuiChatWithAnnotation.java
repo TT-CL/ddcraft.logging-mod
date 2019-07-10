@@ -146,6 +146,13 @@ public class GuiChatWithAnnotation extends GuiChat
     	if(mouseButton == 0)
     	{
         	MyGuiNewChat guiNewChat = (MyGuiNewChat) this.mc.ingameGUI.getChatGUI();
+
+    		if(Objects.nonNull(this.annotationPopUp))
+    		{
+    			this.annotationPopUp.mouseClicked(mouseX, mouseY, mouseButton);
+    			this.annotationPopUp = null;
+    		}
+
         	if(Objects.isNull(guiNewChat))
         	{
         		super.mouseClicked(mouseX, mouseY, mouseButton);
@@ -153,19 +160,10 @@ public class GuiChatWithAnnotation extends GuiChat
         	}
 
             ITextComponent itextcomponent = guiNewChat.getChatComponent(Mouse.getX(), Mouse.getY());
-            //System.out.println(itextcomponent.toString());
             if (itextcomponent != null && this.handleComponentClick(itextcomponent))
             {
-                //System.out.println("clicked: " + itextcomponent.toString());
-                //guiNewChat.setChatComponent(mouseX, mouseY, itextcomponent);
                 return;
             }
-
-    		if(this.annotationPopUp != null)
-    		{
-    			this.annotationPopUp.mouseClicked(mouseX, mouseY, mouseButton);
-    			this.annotationPopUp = null;
-    		}
         }
 
         super.mouseClicked(mouseX, mouseY, mouseButton);
@@ -188,16 +186,10 @@ public class GuiChatWithAnnotation extends GuiChat
         // Note: Don't need AnnotationClickEvent instance; it's just for checking
 
         // Show GUI
-        this.annotationPopUp = new GuiAnnotationPopUp(mc, this, this.lastClickedY, (TextComponentAnnotation) component, Mouse.getX(), Mouse.getY());
-        // 多分リセットされてない
-        // 描画し直す必要がある？
-        // とりあえずアノテーションを優先
+        this.annotationPopUp = new GuiAnnotationPopUp(mc, this, this.lastClickedX, this.lastClickedY, (TextComponentAnnotation) component, Mouse.getX(), Mouse.getY());
 
         return true;
 	}
-
-
-
 
 /*=========================================================================================*/
 
