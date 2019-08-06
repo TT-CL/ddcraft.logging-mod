@@ -25,7 +25,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * GuiNewChat extended for TextComponentAnnotation
  * !Uses reflection to access private fields!
  */
-// TODO: should use something other than reflection to make this mod compatible with other mods
 @SideOnly(Side.CLIENT)
 public class MyGuiNewChat extends GuiNewChat
 {
@@ -99,10 +98,6 @@ public class MyGuiNewChat extends GuiNewChat
 
 	        int i = MathHelper.floor((float)this.getChatWidth() / this.getChatScale());
 	        List<ITextComponent> list = MyGuiUtilRenderComponents.splitText(chatComponent, i, this.mc.fontRenderer, false, false);
-	        for (ITextComponent component : list)
-	        {
-	        	System.out.println(component.toString());
-	        }
 	        boolean flag = this.getChatOpen();
 
 	        for (ITextComponent itextcomponent : list)

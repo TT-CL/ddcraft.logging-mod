@@ -82,7 +82,7 @@ class MyGuiUtilRenderComponents extends GuiUtilRenderComponents
                     s3 = FontRenderer.getFormatFromString(s2) + s3; //Forge: Fix chat formatting not surviving line wrapping.
 
                     ITextComponent textcomponentstring1 = createPartComponent(s3, itextcomponent1);
-                    // System.out.println(textcomponentstring1);
+                    System.out.println(textcomponentstring1);
                     list1.add(j + 1, textcomponentstring1);
                 }
 
@@ -104,7 +104,7 @@ class MyGuiUtilRenderComponents extends GuiUtilRenderComponents
             // Newline
             if (flag)
             {
-                // System.out.println(itextcomponent);
+                System.out.println(itextcomponent);
                 list.add(itextcomponent);
                 i = 0;
                 itextcomponent = new TextComponentString("");

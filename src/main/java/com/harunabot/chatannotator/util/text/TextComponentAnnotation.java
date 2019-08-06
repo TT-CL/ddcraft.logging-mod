@@ -123,12 +123,10 @@ public class TextComponentAnnotation extends TextComponentString
     public void toProperStyle(UUID receiverId)
     {
     	// Sender -> default
-    	/*
     	if(receiverId.toString().equals(senderId)) {
     		this.toDefaultStyle();
     		return;
     	}
-    	*/
 
     	// Receiver -> AnnotationClickEvent, color = YELLOW, underlined
     	Style newStyle = this.getStyle();
