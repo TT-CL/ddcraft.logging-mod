@@ -82,6 +82,7 @@ public class ChatEventHandler
 		{
 			// Replace Chat
 			ITextComponent newComponent = createAnnotatedServerChat((TextComponentTranslation) component, elements, senderId);
+			System.out.println(newComponent.toString());
 			event.setComponent(newComponent);
 		}
 	}
