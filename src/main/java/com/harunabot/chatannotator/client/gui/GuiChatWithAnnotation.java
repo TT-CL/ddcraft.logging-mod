@@ -142,7 +142,6 @@ public class GuiChatWithAnnotation extends GuiChat
         this.lastClickedX = mouseX;
         this.lastClickedY = mouseY;
 
-    	//super.mouseClicked(mouseX, mouseY, mouseButton);
     	if(mouseButton == 0)
     	{
         	MyGuiNewChat guiNewChat = (MyGuiNewChat) this.mc.ingameGUI.getChatGUI();
@@ -175,7 +174,10 @@ public class GuiChatWithAnnotation extends GuiChat
 		// Default action for non-annotationComponent
 		if(!(component instanceof TextComponentAnnotation))
 		{
-			return super.handleComponentClick(component);
+			// TODO: stop click event in smarter way
+			// stop default click event - annoys annotators
+			return false;
+			//return super.handleComponentClick(component);
 		}
 
         ClickEvent clickevent = component.getStyle().getClickEvent();
@@ -186,7 +188,10 @@ public class GuiChatWithAnnotation extends GuiChat
         // Note: Don't need AnnotationClickEvent instance; it's just for checking
 
         // Show GUI
-        this.annotationPopUp = new GuiAnnotationPopUp(mc, this, this.lastClickedX, this.lastClickedY, (TextComponentAnnotation) component, Mouse.getX(), Mouse.getY());
+        MyGuiNewChat guiNewChat = (MyGuiNewChat) this.mc.ingameGUI.getChatGUI();
+        int chatlineNumber = guiNewChat.getChatLineNumber(Mouse.getX(), Mouse.getY());
+        if (chatlineNumber < 0) return false;
+        this.annotationPopUp = new GuiAnnotationPopUp(mc, this, this.lastClickedX, this.lastClickedY, (TextComponentAnnotation) component, Mouse.getX(), Mouse.getY(), chatlineNumber);
 
         return true;
 	}

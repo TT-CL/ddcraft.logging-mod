@@ -37,6 +37,7 @@ public class StringTools
     /**
      * Separate the String into 2 parts: one surrounded by symbols, and the other after that
      */
+    // TODO: ava.lang.StringIndexOutOfBoundsException: String index out of range: -1 when command input
     public static Pair<String, String> separateBySymbols(String str, char firstSymbol, char secondSymbol)
     {
     	String first;

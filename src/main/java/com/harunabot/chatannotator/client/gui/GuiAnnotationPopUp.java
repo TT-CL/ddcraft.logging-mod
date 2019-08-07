@@ -15,6 +15,7 @@ import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
+import net.minecraft.util.text.ITextComponent;
 
 /**
  * Additional Gui for GuiChatAnnotation
@@ -28,8 +29,8 @@ public class GuiAnnotationPopUp extends Gui
 
 	/** list of dialogue acts.*/
 	private final List<DialogueAct> dialogueActs;
-	/** component you want to annotate*/
-	protected final TextComponentAnnotation component;
+	/** group number of component you want to annotate. */
+	protected final int chatLineNumber;
     /** A list of all the buttons in this container. */
     protected List<GuiButton> buttonList = Lists.<GuiButton>newArrayList();
     /** The button that was just pressed. */
@@ -63,7 +64,7 @@ public class GuiAnnotationPopUp extends Gui
 	private static final int EDGERECT_HEIGHT = 6;
 
 
-	public GuiAnnotationPopUp(Minecraft mc, GuiChatWithAnnotation parent, int clickedX, int clickedY, TextComponentAnnotation component, int mouseX, int mouseY)
+	public GuiAnnotationPopUp(Minecraft mc, GuiChatWithAnnotation parent, int clickedX, int clickedY, TextComponentAnnotation component, int mouseX, int mouseY, int chatLineNumber)
 	{
 		super();
 
@@ -74,7 +75,7 @@ public class GuiAnnotationPopUp extends Gui
 		this.baseY = clickedY - (/*2 */ BUTTON_MARGIN);
 
 		this.dialogueActs = DialogueAct.getList();
-		this.component = component;
+		this.chatLineNumber = chatLineNumber;
 		this.componentX = mouseX;
 		this.componentY = mouseY;
 
@@ -193,29 +194,29 @@ public class GuiAnnotationPopUp extends Gui
         if(this.mc.ingameGUI.getChatGUI() instanceof MyGuiNewChat)
         {
         	MyGuiNewChat guiNewChat = (MyGuiNewChat)this.mc.ingameGUI.getChatGUI();
-        	this.component.changeColor(annotating);
-        	guiNewChat.replaceChatComponent(componentX, componentY, this.component);
+        	guiNewChat.changeChatComponentColor(this.chatLineNumber, annotating);
         }
 	}
 
 	protected void annotateComponent(DialogueAct dialogueAct)
 	{
-		// TODO: 別の形で送る
-		String msg = "[" + dialogueAct.getName() + "]" + component.toIdenticalString();
-		msg = StringTools.deleteIllegalCharacters(msg);
-
-		component.annotateByReceiver(dialogueAct);
-		component.toDefaultStyle();
-
-		parent.sendChatMessage(msg, false);
-
         if(this.mc.ingameGUI.getChatGUI() instanceof MyGuiNewChat)
         {
         	MyGuiNewChat guiNewChat = (MyGuiNewChat)this.mc.ingameGUI.getChatGUI();
-        	guiNewChat.replaceChatComponent(componentX, componentY, this.component);
-        }
+        	ITextComponent component = guiNewChat.annotateChatComponent(this.chatLineNumber, dialogueAct);
 
-		ChatAnnotator.LOGGER.log(Level.INFO, "Annotated chat: [annotation]" + dialogueAct.getName() + ", [chat]" + component.getText());
+        	if(component != null && component instanceof TextComponentAnnotation)
+        	{
+        		TextComponentAnnotation componentAnnotation = (TextComponentAnnotation)component;
+	        	String msg = "[" + dialogueAct.getName() + "]" + componentAnnotation.toIdenticalString();
+	        	msg = StringTools.deleteIllegalCharacters(msg);
+	        	// TODO: 別の形で送る
+	        	System.out.println(msg);
+	        	parent.sendChatMessage(msg, false);
+
+	        	ChatAnnotator.LOGGER.log(Level.INFO, "Annotated chat: [annotation]" + dialogueAct.getName() + ", [chat]" + componentAnnotation.getText());
+        	}
+        }
 	}
 
 }

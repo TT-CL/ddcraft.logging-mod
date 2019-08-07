@@ -6,16 +6,16 @@ import net.minecraft.util.text.ITextComponent;
 public class MyChatLine extends ChatLine
 {
     /** int value to refer to existing Chat Line Groups; chats sent at the same time have same group ID */
-    private final int chatLineGroupID;
+    private final int chatLineGroupNumber;
 
-    public MyChatLine(int updateCounterCreatedIn, ITextComponent lineStringIn, int chatLineIDIn, int chatLineGroupIDIn)
+    public MyChatLine(int updateCounterCreatedIn, ITextComponent lineStringIn, int chatLineIDIn, int chatLineGroupNumIn)
     {
     	super(updateCounterCreatedIn, lineStringIn, chatLineIDIn);
-    	this.chatLineGroupID = chatLineGroupIDIn;
+    	this.chatLineGroupNumber = chatLineGroupNumIn;
     }
 
-    public int getChatLineGroupID()
+    public int getChatLineNumber()
     {
-    	return this.chatLineGroupID;
+    	return this.chatLineGroupNumber;
     }
 }
