@@ -191,13 +191,13 @@ public class TextComponentAnnotation extends TextComponentString
      */
     public String toLogString()
     {
-    	return "{text:'" + this.getText() + "', senderId:" + this.senderId + ", senderAnnotation=" + this.senderAnnotation + ","
-    			+ " receiverAnnotation=" + receiverAnnotation + ", time=" + this.time + '}';
+    	return "{\"text\": \"" + this.getText() + "\", \"senderId\": \"" + this.senderId + "\", \"senderAnnotation\": \"" + this.senderAnnotation + "\","
+    			+ " \"receiverAnnotation\": \"" + receiverAnnotation + "\", \"time\": \"" + this.time + "\"}";
     }
 
     public String toIdenticalString()
     {
-    	return "{text:'" + this.getText() + "', senderId:" + this.senderId + ", time=" + this.time + '}';
+    	return "{text:'" + this.getText() + "', senderId:" + this.senderId + ", time:" + this.time + '}';
     }
 
 }
