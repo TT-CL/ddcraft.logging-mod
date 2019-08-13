@@ -127,7 +127,7 @@ public class GuiChatWithAnnotation extends GuiChat
         if (addToChat)
         {
         	// Add message with no annotation
-        	String mainMsg = StringTools.separateBySymbols(msg, '<', '>').getRight();
+        	String mainMsg = StringTools.separatePrefixBySymbols(msg, '<', '>').getRight();
         	mainMsg = (mainMsg != "") ? mainMsg : msg;
             this.mc.ingameGUI.getChatGUI().addToSentMessages(mainMsg);
         }

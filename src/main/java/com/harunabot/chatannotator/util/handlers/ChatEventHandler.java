@@ -189,7 +189,7 @@ public class ChatEventHandler
 	{
 		// Separate the message into the annotation part & main part
 		String rawMsg = msgComponent.getText();
-		Pair<String, String> separatedMsg = StringTools.separateBySymbols(rawMsg, '<', '>');
+		Pair<String, String> separatedMsg = StringTools.separatePrefixBySymbols(rawMsg, '<', '>');
 		String annotationStr = separatedMsg.getLeft();
 		String msg = separatedMsg.getRight();
 		DialogueAct annotation;
@@ -212,7 +212,7 @@ public class ChatEventHandler
 
 	public static void onAnnotatedChat(String rawMsg, EntityPlayerMP player)
 	{
-		Pair<String, String> separatedMsg = StringTools.separateBySymbols(rawMsg, '[', ']');
+		Pair<String, String> separatedMsg = StringTools.separatePrefixBySymbols(rawMsg, '[', ']');
 		String annotationStr = separatedMsg.getLeft();
 		String identicalString = separatedMsg.getRight();
 
