@@ -27,16 +27,17 @@ public class TextComponentAnnotation extends TextComponentString
 	protected String senderId;
 	protected String time;
 	protected String fullMsg;
+	protected int dimension;
 
-	private final int PARAM_NUM = 5;
+	private final int PARAM_NUM = 6;
 
 	// FIXME: should contain sendername?
-    public TextComponentAnnotation(String msg, DialogueAct senderAnnotation, UUID senderId)
+    public TextComponentAnnotation(String msg, DialogueAct senderAnnotation, UUID senderId, int dimension)
     {
-    	this(msg,senderAnnotation, null, senderId.toString(), new SimpleDateFormat("HH:mm:ss").format(new Date()));
+    	this(msg,senderAnnotation, null, senderId.toString(), new SimpleDateFormat("HH:mm:ss").format(new Date()), dimension);
     }
 
-    public TextComponentAnnotation(String msg, DialogueAct senderAnnotation, DialogueAct receiverAnnotation, String senderId, String time)
+    public TextComponentAnnotation(String msg, DialogueAct senderAnnotation, DialogueAct receiverAnnotation, String senderId, String time, int dimension)
     {
     	super(msg);
 
@@ -45,6 +46,7 @@ public class TextComponentAnnotation extends TextComponentString
     	this.senderId = senderId.toString();
     	this.time = time;
     	this.fullMsg = msg;
+    	this.dimension = dimension;
     }
 
     // Recreate from TextComponentString
@@ -60,6 +62,7 @@ public class TextComponentAnnotation extends TextComponentString
 	    	this.senderId = siblings.get(2).getUnformattedText();
 	    	this.time = siblings.get(3).getUnformattedText();
 	    	this.fullMsg = siblings.get(4).getUnformattedText();
+	    	this.dimension = Integer.parseInt(siblings.get(5).getUnformattedText());
 	    	this.setStyle(component.getStyle().createDeepCopy());
     	}
     	catch (Exception e)
@@ -71,6 +74,7 @@ public class TextComponentAnnotation extends TextComponentString
     		this.senderId = "";
     		this.time = "";
     		this.fullMsg = "";
+    		this.dimension = 0;
 
     		return;
     	}
@@ -93,6 +97,7 @@ public class TextComponentAnnotation extends TextComponentString
     	componentString.appendText(senderId.toString());
     	componentString.appendText(time.toString());
     	componentString.appendText(fullMsg);
+    	componentString.appendText(String.valueOf(dimension));
 
     	// Set style to prevent it from changing to String
 		componentString.setStyle(new Style().setColor(TextFormatting.BLACK));
@@ -113,6 +118,11 @@ public class TextComponentAnnotation extends TextComponentString
     public DialogueAct getReceiverAnnotation()
     {
     	return this.receiverAnnotation;
+    }
+
+    public int getDimension()
+    {
+    	return this.dimension;
     }
 
     public boolean isAnnotated()
@@ -167,7 +177,7 @@ public class TextComponentAnnotation extends TextComponentString
     		System.out.println("Not partial: '" + msg + "' , '" + this.fullMsg + "'");
     	}
 
-    	TextComponentAnnotation textcomponentannotation = new TextComponentAnnotation(msg, this.senderAnnotation, this.receiverAnnotation, this.senderId.toString(), this.time);
+    	TextComponentAnnotation textcomponentannotation = new TextComponentAnnotation(msg, this.senderAnnotation, this.receiverAnnotation, this.senderId.toString(), this.time, this.dimension);
 		textcomponentannotation.setStyle(this.getStyle().createShallowCopy());
 
 		for(ITextComponent iTextComponent : this.getSiblings())

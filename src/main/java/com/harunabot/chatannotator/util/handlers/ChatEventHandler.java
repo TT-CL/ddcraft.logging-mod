@@ -1,7 +1,6 @@
 package com.harunabot.chatannotator.util.handlers;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -14,46 +13,53 @@ import com.harunabot.chatannotator.util.text.StringTools;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.world.World;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @Mod.EventBusSubscriber
+/**
+ * Makes chat annotatable & visible only for same dimension's players
+ */
 public class ChatEventHandler
 {
 	private static final String CHAT_KEY = "chat.type.text";
 
-	public static AnnotationLog annotationLog = null;
-
-	public static void preInit(FMLPreInitializationEvent event)
+	@SubscribeEvent
+	public static void onStartGame(WorldEvent.Load event)
 	{
-		// Initialize logger
-		annotationLog = new AnnotationLog();
-	}
+		World world = event.getWorld();
+		if (world.isRemote) return;
 
-	public static void init(FMLInitializationEvent event)
-	{
-	}
-
-	public static void postInit(FMLPostInitializationEvent event)
-	{
+		int dimension = world.provider.getDimension();
+		if (dimension == 1 || dimension == -1)
+		{
+			// No log for nether and The end
+			return;
+		}
+		ChatAnnotator.annotationLogs.put(dimension, new AnnotationLog(dimension));
 	}
 
 	@SubscribeEvent
 	public static void onFinishGame(WorldEvent.Unload event)
 	{
-		if(event.getWorld().isRemote | annotationLog == null) return;
+		World world = event.getWorld();
+		int dimension = world.provider.getDimension();
+		Map<Integer, AnnotationLog> logs = ChatAnnotator.annotationLogs;
+		if (world.isRemote || !logs.containsKey(dimension)) return;
 
-		annotationLog.outputAnnotationFile();
+		logs.get(dimension).outputAnnotationFile();
+		logs.remove(dimension);
 	}
 
 	/**
@@ -70,6 +76,8 @@ public class ChatEventHandler
 
 		// Sender's UUID
 		UUID senderId = event.getPlayer().getUniqueID();
+		// Sender's dimension
+		int dimension = event.getPlayer().getServerWorld().provider.getDimension();
 
 		if(isAnnotation(elements.msgComponent))
 		{
@@ -81,7 +89,7 @@ public class ChatEventHandler
 		else
 		{
 			// Replace Chat
-			ITextComponent newComponent = createAnnotatedServerChat((TextComponentTranslation) component, elements, senderId);
+			ITextComponent newComponent = createAnnotatedServerChat((TextComponentTranslation) component, elements, senderId, dimension);
 			event.setComponent(newComponent);
 		}
 	}
@@ -108,13 +116,15 @@ public class ChatEventHandler
 	}
 
 	/**
-	 * Set the proper style
+	 * Set the proper style, make chat from other dimension invisible
 	 * @param event
 	 */
 	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
 	public static void onReceivedClientChat(ClientChatReceivedEvent event)
 	{
 		if(!(event.getMessage() instanceof TextComponentTranslation)) return;
+		EntityPlayer player = Minecraft.getMinecraft().player;
 
 		TextComponentTranslation component = (TextComponentTranslation) event.getMessage();
 		// Pass non-chat message
@@ -128,8 +138,17 @@ public class ChatEventHandler
 		TextComponentAnnotation msgComponent = new TextComponentAnnotation(msgComponentString);
 		if(msgComponent.getTime().equals("")) return;
 
+		// Check Dimension and return if different dimension
+		int messageDim = msgComponent.getDimension();
+		int playerDim = player.world.provider.getDimension();
+		if (messageDim != playerDim)
+		{
+			event.setCanceled(true);
+			return;
+		}
+
 		// Set chat to proper style based on the sender/receiver
-		UUID receiverId = Minecraft.getMinecraft().player.getUniqueID();
+		UUID receiverId = player.getUniqueID();
 		msgComponent.toProperStyle(receiverId);
 
 		args[1] = msgComponent;
@@ -154,9 +173,9 @@ public class ChatEventHandler
 	/**
 	 * Create new componentTranslation with annotated message
 	 */
-	private static ITextComponent createAnnotatedServerChat(TextComponentTranslation component, ComponentElements elements, UUID senderId)
+	private static ITextComponent createAnnotatedServerChat(TextComponentTranslation component, ComponentElements elements, UUID senderId, int dimension)
 	{
-		ITextComponent newMsgComponent = createAnnotatedChat(elements.msgComponent, senderId);
+		ITextComponent newMsgComponent = createAnnotatedChat(elements.msgComponent, senderId, dimension);
 		if(newMsgComponent == null) {
 			// Something wrong with the message
 			ChatAnnotator.LOGGER.log(Level.ERROR, "Invalid chat textcomponent: " + elements.msgComponent.getText());
@@ -185,7 +204,7 @@ public class ChatEventHandler
 	/**
 	 * Create new AnnotatedComponent from TextComponentString
 	 */
-	private static TextComponentString createAnnotatedChat(TextComponentString msgComponent, UUID senderId)
+	private static TextComponentString createAnnotatedChat(TextComponentString msgComponent, UUID senderId, int dimension)
 	{
 		// Separate the message into the annotation part & main part
 		String rawMsg = msgComponent.getText();
@@ -202,10 +221,10 @@ public class ChatEventHandler
 			return null;
 		}
 
-		TextComponentAnnotation annotatedChat = new TextComponentAnnotation(msg, annotation, senderId);
+		TextComponentAnnotation annotatedChat = new TextComponentAnnotation(msg, annotation, senderId, dimension);
 
 		// Take log
-		addNewChat(annotatedChat);
+		addNewChat(annotatedChat, dimension);
 
 		return annotatedChat.toComponentString();
 	}
@@ -213,8 +232,10 @@ public class ChatEventHandler
 	public static void onAnnotatedChat(String rawMsg, EntityPlayerMP player)
 	{
 		Pair<String, String> separatedMsg = StringTools.separatePrefixBySymbols(rawMsg, '[', ']');
+		Pair<String, String> separatedRight = StringTools.separatePrefixBySymbols(separatedMsg.getRight(), '(', ')');
 		String annotationStr = separatedMsg.getLeft();
-		String identicalString = separatedMsg.getRight();
+		int dimension = Integer.valueOf(separatedRight.getLeft());
+		String identicalString = separatedRight.getRight();
 
 		DialogueAct annotation = DialogueAct.convertFromName(annotationStr);
 		if (annotation == null)
@@ -223,38 +244,22 @@ public class ChatEventHandler
 			return;
 		}
 
-		annotationLog.annotateChat(annotation, identicalString, player);
+		ChatAnnotator.annotationLogs.get(dimension).annotateChat(annotation, identicalString, player);
 	}
 
 	/**
 	 * Take log
 	 */
-	protected static void addNewChat(TextComponentAnnotation component)
+	protected static void addNewChat(TextComponentAnnotation component, int dimension)
 	{
 		try
 		{
-			annotationLog.addNewChat((TextComponentAnnotation) component);
+			ChatAnnotator.annotationLogs.get(dimension).addNewChat((TextComponentAnnotation) component);
 		}
 		catch(NullPointerException e)
 		{
 			ChatAnnotator.LOGGER.log(Level.ERROR, "Can't find log file");
 		}
-	}
-
-	/**
-	 * Create output file for log
-	 */
-	protected static void createOutputFile(String directoryName, String filePath)
-	{
-		File dir = new File(directoryName);
-        File file = new File(filePath);
-        try {
-        	if(!dir.exists()) dir.mkdir();
-            file.createNewFile();
-            ChatAnnotator.LOGGER.log(Level.INFO, "Successfully created output file");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 	}
 
 	/*==========================================================*/

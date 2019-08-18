@@ -169,7 +169,6 @@ public class MyGuiNewChat extends GuiNewChat
 
 	        if(chatline instanceof MyChatLine)
 	        {
-	        	System.out.println(((MyChatLine)chatline).getChatLineNumber() + ": " + chatline.getChatComponent().toString());
 	        	return ((MyChatLine)chatline).getChatLineNumber();
 	        }
 

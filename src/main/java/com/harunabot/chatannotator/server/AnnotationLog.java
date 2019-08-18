@@ -28,9 +28,9 @@ import net.minecraft.entity.player.EntityPlayerMP;
  */
 public class AnnotationLog
 {
-	protected static final String DIR_NAME = "annotationLogs";
-	protected static final String CHATLOG_BASE_FNAME = "chatLog_";
-	protected static final String ANNOTATION_BASE_FNAME= "annotation_";
+	protected static final String DIR_NAME = "annotationLogs/";
+	protected static final String CHATLOG_FNAME_FORMAT = "chatLog_%s_%d.log";
+	protected static final String ANNOTATION_FNAME_FORMAT= "annotation_%s_%d.json";
 
 	private final String logFilePath;
 	private final String annotationFilePath;
@@ -42,14 +42,11 @@ public class AnnotationLog
 	private List<TextComponentAnnotation> unAnnotatedComponents;
 
 
-
-
-	public AnnotationLog()
+	public AnnotationLog(int dimension)
 	{
-		// TODO: separate by world
 		String date = new SimpleDateFormat("yy-MM-dd_HH.mm.ss").format(new Date());
-		this.logFilePath = DIR_NAME + "/" +  CHATLOG_BASE_FNAME + date + ".log";
-		this.annotationFilePath = DIR_NAME + "/" + ANNOTATION_BASE_FNAME + date + ".json";
+		this.logFilePath = DIR_NAME + String.format(CHATLOG_FNAME_FORMAT, date, dimension);
+		this.annotationFilePath = DIR_NAME + String.format(ANNOTATION_FNAME_FORMAT, date, dimension);
 
 		this.components = new ArrayList<>();
 		this.annotatedComponents = new HashMap<>();

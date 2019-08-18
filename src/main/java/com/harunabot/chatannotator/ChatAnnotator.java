@@ -1,8 +1,12 @@
 package com.harunabot.chatannotator;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.logging.log4j.Logger;
 
 import com.harunabot.chatannotator.proxy.CommonProxy;
+import com.harunabot.chatannotator.server.AnnotationLog;
 import com.harunabot.chatannotator.util.Reference;
 
 import net.minecraftforge.fml.common.Mod;
@@ -20,6 +24,8 @@ public class ChatAnnotator
 
 	@SidedProxy(clientSide = Reference.CLIENT_PROXY_CLASS, serverSide = Reference.SERVER_PROXY_CLASS)
 	public static CommonProxy proxy;
+
+	public static Map<Integer, AnnotationLog> annotationLogs = new HashMap<>();
 
 	public static Logger LOGGER;
 

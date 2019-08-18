@@ -208,10 +208,10 @@ public class GuiAnnotationPopUp extends Gui
         	if(component != null && component instanceof TextComponentAnnotation)
         	{
         		TextComponentAnnotation componentAnnotation = (TextComponentAnnotation)component;
-	        	String msg = "[" + dialogueAct.getName() + "]" + componentAnnotation.toIdenticalString();
+        		int dimension = componentAnnotation.getDimension();
+        		String msg = String.format("[%s](%d)%s", dialogueAct.getName(), dimension, componentAnnotation.toIdenticalString());
 	        	msg = StringTools.deleteIllegalCharacters(msg);
-	        	// TODO: 別の形で送る
-	        	System.out.println(msg);
+	        	// TODO: 別の形で送る AnnotationHandlerみたいなの
 	        	parent.sendChatMessage(msg, false);
 
 	        	ChatAnnotator.LOGGER.log(Level.INFO, "Annotated chat: [annotation]" + dialogueAct.getName() + ", [chat]" + componentAnnotation.getText());
