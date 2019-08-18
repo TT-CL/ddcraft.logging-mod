@@ -36,10 +36,6 @@ public class GuiAnnotationPopUp extends Gui
     /** The button that was just pressed. */
     protected GuiButton selectedButton;
 
-    /** position of component(got by org.lwjgl.input.Mouse.getX() or get y()) */
-    protected final int componentX;
-    protected final int componentY;
-
     /** base position(clicked position) */
     private int baseX;
 	private int baseY;
@@ -76,8 +72,6 @@ public class GuiAnnotationPopUp extends Gui
 
 		this.dialogueActs = DialogueAct.getList();
 		this.chatLineNumber = chatLineNumber;
-		this.componentX = mouseX;
-		this.componentY = mouseY;
 
 		// init buttons
 		setupButtons(this.baseX, this.baseY);

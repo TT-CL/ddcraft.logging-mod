@@ -83,12 +83,15 @@ public class MyGuiNewChat extends GuiNewChat
 
 		for (int i = chatLines.size() - 1; i >= 0; --i)
 		{
-		    ChatLine chatline = chatLines.get(i);
-		    this.setChatLine(chatline.getChatComponent(), chatline.getChatLineID(), chatline.getUpdatedCounter(), true);
+		    MyChatLine chatline = (MyChatLine) chatLines.get(i);
+		    this.setChatLine(chatline.getChatComponent(), chatline.getChatLineID(), chatline.getUpdatedCounter(), true, chatline.getChatLineNumber());
 		}
     }
 
-    private void setChatLine(ITextComponent chatComponent, int chatLineId, int updateCounter, boolean displayOnly)
+	/**
+	 * set chatline without updating chatlinenumber
+	 */
+    private void setChatLine(ITextComponent chatComponent, int chatLineId, int updateCounter, boolean displayOnly, int chatLineNumber)
     {
     	try {
 			// Reflect GuiNewChat private fields--------------------------------------------
@@ -112,7 +115,7 @@ public class MyGuiNewChat extends GuiNewChat
 	                this.scroll(1);
 	            }
 
-	            this.drawnChatLines.add(0, new MyChatLine(updateCounter, itextcomponent, chatLineId, chatLineNumberCount));
+	            this.drawnChatLines.add(0, new MyChatLine(updateCounter, itextcomponent, chatLineId, chatLineNumber));
 	        }
 
 	        while (drawnChatLines.size() > 100)
@@ -122,16 +125,13 @@ public class MyGuiNewChat extends GuiNewChat
 
 	        if (!displayOnly)
 	        {
-	            this.chatLines.add(0, new MyChatLine(updateCounter, chatComponent, chatLineId, chatLineNumberCount));
+	            this.chatLines.add(0, new MyChatLine(updateCounter, chatComponent, chatLineId, chatLineNumber));
 
 	            while (this.chatLines.size() > 100)
 	            {
 	            	this.chatLines.remove(this.chatLines.size() - 1);
 	            }
 	        }
-
-	        // Update chatgroup counter-------------------------------------------------------
-	        this.chatLineNumberCount++;
 		}
 		catch(UnableToFindFieldException | UnableToAccessFieldException e)
 		{
@@ -139,6 +139,15 @@ public class MyGuiNewChat extends GuiNewChat
 			e.printStackTrace();
 		}
     }
+
+    /**
+     * set chatline using new chatline number
+     */
+	private void setChatLine(ITextComponent chatComponent, int chatLineId, int updateCounter, boolean displayOnly)
+	{
+		int chatLineNumber = chatLineNumberCount++;
+		setChatLine(chatComponent, chatLineId, updateCounter, displayOnly, chatLineNumber);
+	}
 
     public int getChatLineNumber(int mouseX, int mouseY)
     {
