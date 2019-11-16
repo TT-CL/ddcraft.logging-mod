@@ -5,24 +5,27 @@ import java.util.List;
 
 public enum DialogueAct
 {
-	QUESTION(0, "質問"),
-	SUGGEST (1, "提案"),
-	GREETING(2, "挨拶"),
-	YES     (3, "はい"),
-	NO      (4, "いいえ"),
-	CONVEY  (5, "伝達"),
-	EXCLAMATION(6,"感嘆"),
-	CORRECT   (7, "訂正");
+	QUESTION(0, "質問", "question.png"),
+	SUGGEST (1, "提案", "suggest.png"),
+	CONVEY  (2, "伝達", "convey.png"),
+	YES     (3, "はい", "yes.png"),
+	NO      (4, "いいえ", "no.png"),
+	GREETING(5, "挨拶", "greeting.png"),
+	EXCLAMATION(6,"感嘆", "exclamation.png"),
+	CORRECT   (7, "訂正", "correct.png");
 
 	public static final List<DialogueAct> DIALOGUE_ACTS = new ArrayList<DialogueAct>();
 
 	private final int id;
 	private final String name;
+	// TODO:  enumとかで絵文字から選べるようにする
+	private final String iconFile;
 
-	private DialogueAct(final int id, final String name)
+	private DialogueAct(final int id, final String name, String iconFile)
 	{
 		this.id = id;
 		this.name = name;
+		this.iconFile = iconFile;
 	}
 
 	public int getId()
@@ -33,6 +36,11 @@ public enum DialogueAct
 	public String getName()
 	{
 		return name;
+	}
+
+	public String getIconFile()
+	{
+		return iconFile;
 	}
 
 	public static DialogueAct convertFromName(String name)

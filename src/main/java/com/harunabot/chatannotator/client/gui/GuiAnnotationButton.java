@@ -15,7 +15,7 @@ public class GuiAnnotationButton extends GuiButton
 	public static final int HEIGHT = 15;
 	protected static final int ICON_SIZE = 8;
 
-	protected final ResourceLocation ICON_TEXTURE = new ResourceLocation(Reference.MOD_ID, "texture/gui/emoji/greeting.png");
+	protected final ResourceLocation ICON_TEXTURE;
 
 	protected DialogueAct dialogueAct;
 
@@ -24,6 +24,7 @@ public class GuiAnnotationButton extends GuiButton
 		super(buttonId, x, y, WIDTH, HEIGHT, I18n.format(dialogueAct.getName()));
 
 		this.dialogueAct = dialogueAct;
+		ICON_TEXTURE = new ResourceLocation(Reference.MOD_ID, "texture/gui/emoji/" + dialogueAct.getIconFile());
 	}
 
 	public void activate()
