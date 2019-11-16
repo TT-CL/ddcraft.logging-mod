@@ -17,14 +17,14 @@ public class GuiAnnotationButton extends GuiButton
 
 	protected final ResourceLocation ICON_TEXTURE;
 
-	protected DialogueAct dialogueAct;
+	protected final DialogueAct dialogueAct;
 
 	public GuiAnnotationButton(int buttonId, int x, int y, DialogueAct dialogueAct)
 	{
 		super(buttonId, x, y, WIDTH, HEIGHT, I18n.format(dialogueAct.getName()));
 
 		this.dialogueAct = dialogueAct;
-		ICON_TEXTURE = new ResourceLocation(Reference.MOD_ID, "texture/gui/emoji/" + dialogueAct.getIconFile());
+		this.ICON_TEXTURE = new ResourceLocation(Reference.MOD_ID, "texture/gui/emoji/" + dialogueAct.getIconFile());
 	}
 
 	public void activate()
@@ -43,10 +43,39 @@ public class GuiAnnotationButton extends GuiButton
     @Override
     public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks)
     {
-		super.drawButton(mc, mouseX, mouseY, partialTicks);
+        if (this.visible)
+        {
+        	// draw button(almost the same as the parent, except for color;
+            FontRenderer fontrenderer = mc.fontRenderer;
+            mc.getTextureManager().bindTexture(BUTTON_TEXTURES);
+            GlStateManager.color(dialogueAct.red, dialogueAct.green, dialogueAct.blue, 1.0F);
+            this.hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
+            int i = this.getHoverState(this.hovered);
+            GlStateManager.enableBlend();
+            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+            this.drawTexturedModalRect(this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
+            this.drawTexturedModalRect(this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
+            this.mouseDragged(mc, mouseX, mouseY);
+            int j = 14737632;
 
-		if (this.visible)
-		{
+            if (packedFGColour != 0)
+            {
+                j = packedFGColour;
+            }
+            else
+            if (!this.enabled)
+            {
+                j = 10526880;
+            }
+            else if (this.hovered)
+            {
+                j = 16777120;
+            }
+
+            this.drawCenteredString(fontrenderer, this.displayString, this.x + this.width / 2, this.y + (this.height - 8) / 2, j);
+
+            // draw icon
 			int scale = 32;
 			double ratio = 1.0/scale;
 			int margin = (HEIGHT - ICON_SIZE)/2;
