@@ -35,33 +35,6 @@ public class ChatEventHandler
 {
 	private static final String CHAT_KEY = "chat.type.text";
 
-	@SubscribeEvent
-	public static void onStartGame(WorldEvent.Load event)
-	{
-		World world = event.getWorld();
-		if (world.isRemote) return;
-
-		int dimension = world.provider.getDimension();
-		if (dimension == 1 || dimension == -1)
-		{
-			// No log for nether and The end
-			return;
-		}
-		ChatAnnotator.annotationLogs.put(dimension, new AnnotationLog(dimension));
-	}
-
-	@SubscribeEvent
-	public static void onFinishGame(WorldEvent.Unload event)
-	{
-		World world = event.getWorld();
-		int dimension = world.provider.getDimension();
-		Map<Integer, AnnotationLog> logs = ChatAnnotator.annotationLogs;
-		if (world.isRemote || !logs.containsKey(dimension)) return;
-
-		logs.get(dimension).outputAnnotationFile();
-		logs.remove(dimension);
-	}
-
 	/**
 	 * Change chat message to TextComponentAnnotation
 	 * or apply annotation

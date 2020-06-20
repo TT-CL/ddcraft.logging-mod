@@ -18,7 +18,7 @@ public class HandlerNotifyArrivalMessage implements IMessageHandler<NotifyArriva
 	@Override
 	public RequestScreenshotMessage onMessage(NotifyArrivalMessage message, MessageContext ctx)
 	{
-
+		EntityPlayerMP player = ctx.getServerHandler().player;
 		int imageId = message.getImageId();
 
 		if (imageId == -1)
@@ -27,7 +27,7 @@ public class HandlerNotifyArrivalMessage implements IMessageHandler<NotifyArriva
 			return null;
 		}
 
-		ScreenRecorder.SCREENSHOT_LOG.reserveScreenshot(imageId, message.getPartsNum(), message.getTotalLength());
+		ScreenRecorder.SCREENSHOT_LOG.reserveScreenshot(player, imageId, message.getPartsNum(), message.getTotalLength());
 		ChatAnnotator.LOGGER.log(Level.INFO, "Reserved Screenshot for id: " + imageId);
 
 		return new RequestScreenshotMessage(imageId);

@@ -36,8 +36,9 @@ public class ChatAnnotator
 
 	//public static ScreenRecorder SCREEN_RECORDER;
 
-	// Directory for saving file
+	// Directory for saving files
 	public static final File modDirectory = new File(Reference.MOD_ID);
+	public static Map<Integer, File> dimensionDirectories = new HashMap<>();
 
 	@Mod.EventHandler
 	public static void PreInit(FMLPreInitializationEvent event)

@@ -16,7 +16,8 @@ public class HandlerScreenshotDataMessage implements IMessageHandler<ScreenshotD
 	@Override
 	public IMessage onMessage(ScreenshotDataMessage message, MessageContext ctx)
 	{
-		ScreenRecorder.SCREENSHOT_LOG.saveSubData(message.getImageId(), message.getPartId(), message.getBytes());
+		EntityPlayerMP player = ctx.getServerHandler().player;
+		ScreenRecorder.SCREENSHOT_LOG.saveSubData(player, message.getImageId(), message.getPartId(), message.getBytes());
 
 		return null;
 	}

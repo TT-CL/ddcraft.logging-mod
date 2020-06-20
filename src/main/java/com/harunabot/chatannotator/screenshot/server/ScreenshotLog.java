@@ -4,9 +4,11 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
@@ -14,64 +16,46 @@ import org.apache.logging.log4j.Level;
 
 import com.harunabot.chatannotator.ChatAnnotator;
 import com.harunabot.chatannotator.screenshot.client.StandbyScreenshots;
+import com.ibm.icu.text.SimpleDateFormat;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import scala.language;
 import scala.collection.generic.BitOperations.Int;
+import scala.reflect.internal.Trees.New;
 
 public class ScreenshotLog
 {
-	public static final int PART_SIZE = StandbyScreenshots.PART_SIZE;
-
-	private class Screenshot
-	{
-		byte[] data;
-		int count;
-
-		public Screenshot(int parts, int length)
-		{
-			data = new byte[length];
-			count = parts;
-		}
-
-		public void applySubData(int id, byte[] subdata)
-		{
-			System.arraycopy(subdata, 0, data, id * PART_SIZE, subdata.length);
-			count--;
-		}
-
-		public void saveImage()
-		{
-			if (count > 0) return;
-
-			try{
-				BufferedImage screenshot = ImageIO.read( new ByteArrayInputStream( data ) );
-				ImageIO.write(screenshot, "png", new File(ChatAnnotator.modDirectory, "test.png"));
-			}
-			catch( IOException e )
-			{
-				ChatAnnotator.LOGGER.log(Level.ERROR, "Failed to save image data");
-			}
-		}
-	}
-
-	// TODO: reserve for each players
 	// TODO: チャット内容とimageIdの紐付け
-	private Map<Integer, Screenshot> screenshots = new HashMap<Integer, Screenshot>();
+	private Map<UUID, Map<Integer, FragScreenshot>> playerScreenshots = new HashMap<UUID, Map<Integer, FragScreenshot>>();
 
-	public int reserveScreenshot(int imageId, int parts, int length)
+	public int reserveScreenshot(EntityPlayerMP player, int imageId, int parts, int length)
 	{
-		screenshots.put(imageId, new Screenshot(parts, length));
+		UUID uuid = player.getUniqueID();
+		if (!playerScreenshots.containsKey(uuid))
+		{
+			playerScreenshots.put(uuid, new HashMap<Integer, FragScreenshot>());
+		}
+
+		Map<Integer, FragScreenshot> screenshots = playerScreenshots.get(uuid);
+		screenshots.put(imageId, new FragScreenshot(parts, length));
 		return imageId;
 	}
 
-	public void saveSubData(int imageId, int partId, byte[] subData)
+	public void saveSubData(EntityPlayerMP player, int imageId, int partId, byte[] subData)
 	{
-		Screenshot image = screenshots.get(imageId);
+		UUID uuid = player.getUniqueID();
+		Map<Integer, FragScreenshot> screenshots = playerScreenshots.get(uuid);
+		FragScreenshot image = screenshots.get(imageId);
 		image.applySubData(partId, subData);
 
 		// Output as an image if all the data arrives, then release
-		if (image.count > 0) return;
-		image.saveImage();
+		if (!image.isComplete()) return;
+
+		File dimDir = ChatAnnotator.dimensionDirectories.get(player.dimension);
+		File outputDir = new File(dimDir, uuid.toString());
+		if (!outputDir.exists()) outputDir.mkdir();
+		String fileName = String.format("%03d.png", imageId);
+		image.saveImage(new File(outputDir, fileName));
 		screenshots.remove(imageId);
 	}
 }
