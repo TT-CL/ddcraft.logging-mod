@@ -1,14 +1,19 @@
 package com.harunabot.chatannotator;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 
 import com.harunabot.chatannotator.proxy.CommonProxy;
+import com.harunabot.chatannotator.screenshot.ScreenRecorder;
 import com.harunabot.chatannotator.server.AnnotationLog;
 import com.harunabot.chatannotator.util.Reference;
+import com.harunabot.chatannotator.util.handlers.ChatAnnotatorPacketHandler;
 
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -29,6 +34,12 @@ public class ChatAnnotator
 
 	public static Logger LOGGER;
 
+	//public static ScreenRecorder SCREEN_RECORDER;
+
+	// Directory for saving files
+	public static final File modDirectory = new File(Reference.MOD_ID);
+	public static Map<Integer, File> dimensionDirectories = new HashMap<>();
+
 	@Mod.EventHandler
 	public static void PreInit(FMLPreInitializationEvent event)
 	{
@@ -40,12 +51,28 @@ public class ChatAnnotator
 	public static void init(FMLInitializationEvent event)
 	{
 		proxy.init(event);
+
+		// TODO Later: move to serverside?
+		try {
+			modDirectory.mkdir();
+		}
+		catch (SecurityException e)
+		{
+			LOGGER.log(Level.ERROR, "Failed to create a directory");
+		}
+
+		// proxy?
+		ChatAnnotatorPacketHandler.init(event);
+
+		ScreenRecorder.init();
 	}
 
 	@Mod.EventHandler
 	public static void PostInit(FMLPostInitializationEvent event)
 	{
 		proxy.postInit(event);
+
+
 	}
 
 }

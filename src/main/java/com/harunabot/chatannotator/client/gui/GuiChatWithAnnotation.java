@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Mouse;
 
+import com.harunabot.chatannotator.screenshot.ScreenRecorder;
 import com.harunabot.chatannotator.util.text.StringTools;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
 import com.harunabot.chatannotator.util.text.event.AnnotationClickEvent;
@@ -117,6 +118,9 @@ public class GuiChatWithAnnotation extends GuiChat
     	// NetworkManagerとか
     	msg = "<" + activatedButton.displayString + ">" + msg;
     	super.sendChatMessage(msg);
+
+    	// send screenshot together
+    	ScreenRecorder.reserveScreenshot();
     }
 
     // @Override
