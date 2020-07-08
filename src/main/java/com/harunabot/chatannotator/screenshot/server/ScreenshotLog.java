@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,12 +17,8 @@ import org.apache.logging.log4j.Level;
 
 import com.harunabot.chatannotator.ChatAnnotator;
 import com.harunabot.chatannotator.screenshot.client.StandbyScreenshots;
-import com.ibm.icu.text.SimpleDateFormat;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import scala.language;
-import scala.collection.generic.BitOperations.Int;
-import scala.reflect.internal.Trees.New;
 
 public class ScreenshotLog
 {
@@ -54,7 +51,9 @@ public class ScreenshotLog
 		File dimDir = ChatAnnotator.dimensionDirectories.get(player.dimension);
 		File outputDir = new File(dimDir, uuid.toString());
 		if (!outputDir.exists()) outputDir.mkdir();
-		String fileName = String.format("%03d.png", imageId);
+
+		String date = new SimpleDateFormat("yy-MM-dd_HH.mm.ss").format(new Date());
+		String fileName = String.format("%03d_%s.png", imageId, date);
 		image.saveImage(new File(outputDir, fileName));
 		screenshots.remove(imageId);
 	}
