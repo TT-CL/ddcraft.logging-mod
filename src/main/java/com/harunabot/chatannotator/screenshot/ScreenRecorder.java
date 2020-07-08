@@ -23,9 +23,26 @@ public class ScreenRecorder
 	public static ScreenshotLog SCREENSHOT_LOG;
 	public static StandbyScreenshots SCREENSHOT_HOLDER;
 
+	// Flag to reserve screenshot
+	protected static boolean shootFlag;
+
+	/**
+	 * Set the flag true to create the screenshot on an appropriate event
+	 */
+	@SideOnly(Side.CLIENT)
+	public static void reserveScreenshot()
+	{
+		shootFlag = true;
+	}
 
 	@SideOnly(Side.CLIENT)
-	public static void createScreenShot()
+	public static boolean isShootFlagOn()
+	{
+		return shootFlag;
+	}
+
+	@SideOnly(Side.CLIENT)
+	public static void createScreenshot()
 	{
 		BufferedImage bufferedImage;
 		NotifyArrivalMessage message;
@@ -35,11 +52,15 @@ public class ScreenRecorder
 		message = SCREENSHOT_HOLDER.registerImage(bufferedImage);
 
 		ChatAnnotatorPacketHandler.sendToServer(message);
+
+		shootFlag = false;
 	}
 
 	public static void init()
 	{
 		SCREENSHOT_LOG = new ScreenshotLog();
 		SCREENSHOT_HOLDER = new StandbyScreenshots();
+
+		shootFlag = false;
 	}
 }
