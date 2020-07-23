@@ -10,11 +10,10 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.MapSerializer;
 import com.harunabot.chatannotator.ChatAnnotator;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -25,6 +24,15 @@ public class ChatRecorder
 	// TODO: チャットアノテーションとの紐付け
 	// TODO: reset on dimension change
 	private Map<UUID, Map<Integer, ChatStatusJson>> chatStatuses = new HashMap<>();
+
+	private Map<Integer, ArrayList<GimmickLogJson>> gimmickLogs = new HashMap<>();
+
+	public void refreshDimension(int dimension)
+	{
+		if (!gimmickLogs.containsKey(dimension)) return;
+
+		gimmickLogs.put(dimension, new ArrayList<>());
+	}
 
 	public void recordChatStatus(EntityPlayer player, BlockPos playerPos, Vec3d playerLook, BlockPos lookingBlockPos, String lookingBlockName)
 	{
@@ -42,20 +50,41 @@ public class ChatRecorder
 		 outputPlayerJson(player);
 	}
 
+	public void recordGimmickLog(EntityPlayer player, BlockPos gimmickPos, ResourceLocation gimmickName, boolean isActivated)
+	{
+		int dimension = player.dimension;
+		if (!gimmickLogs.containsKey(dimension))
+		{
+			gimmickLogs.put(dimension, new ArrayList<>());
+		}
+
+		 ArrayList<GimmickLogJson> dimLog = gimmickLogs.get(dimension);
+		 dimLog.add(new GimmickLogJson(gimmickPos, gimmickName, isActivated, player, new Date()));
+
+		 // Output
+		 File dimDir = ChatAnnotator.dimensionDirectories.get(dimension);
+		 File jsonFile = new File(dimDir, "gimmickLog.json");
+		 outputJson(jsonFile, dimLog);
+	}
+
 	protected void outputPlayerJson(EntityPlayer player)
 	{
 		UUID uuid = player.getUniqueID();
-		// @JsonSerialize(keyUsing = MapSerializer.class)
 		Map<Integer, ChatStatusJson> jsonMap = chatStatuses.get(uuid);
 
 		File dimDir = ChatAnnotator.dimensionDirectories.get(player.dimension);
 		File logDir = new File(dimDir, STATUS_DIR_NAME);
 		if (!logDir.exists()) logDir.mkdir();
-
-		ObjectMapper mapper = new ObjectMapper();
 		File jsonFile = new File(logDir, uuid.toString() + ".json");
+
+		outputJson(jsonFile, jsonMap);
+	}
+
+	protected static void outputJson(File jsonFile, Object jsonValue)
+	{
+		ObjectMapper mapper = new ObjectMapper();
 		try {
-			 mapper.writerWithDefaultPrettyPrinter().writeValue(jsonFile, jsonMap);
+			 mapper.writerWithDefaultPrettyPrinter().writeValue(jsonFile, jsonValue);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 			System.out.println("Failed to process json");
