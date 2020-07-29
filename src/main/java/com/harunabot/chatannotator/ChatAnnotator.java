@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 
+import com.harunabot.chatannotator.annotator.server.ChatRecorder;
 import com.harunabot.chatannotator.proxy.CommonProxy;
 import com.harunabot.chatannotator.screenshot.ScreenRecorder;
 import com.harunabot.chatannotator.server.AnnotationLog;
@@ -35,6 +36,7 @@ public class ChatAnnotator
 	public static Logger LOGGER;
 
 	//public static ScreenRecorder SCREEN_RECORDER;
+	public static ChatRecorder CHAT_RECORDER;
 
 	// Directory for saving files
 	public static final File modDirectory = new File(Reference.MOD_ID);
@@ -64,6 +66,7 @@ public class ChatAnnotator
 		// proxy?
 		ChatAnnotatorPacketHandler.init(event);
 
+		CHAT_RECORDER = new ChatRecorder();
 		ScreenRecorder.init();
 	}
 
