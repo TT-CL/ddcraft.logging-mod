@@ -83,7 +83,7 @@ public class PlayerStateMessage implements IMessage
 
 		buf.writeDouble(playerLook.x);
 		buf.writeDouble(playerLook.y);
-		buf.writeDouble(playerLook.y);
+		buf.writeDouble(playerLook.z);
 
 		buf.writeInt(lookingAtPos.getX());
 		buf.writeInt(lookingAtPos.getY());
