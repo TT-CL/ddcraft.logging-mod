@@ -1,16 +1,14 @@
 package com.harunabot.chatannotator.annotator.server;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.harunabot.chatannotator.ChatAnnotator;
+import com.harunabot.chatannotator.server.FileOutput;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
@@ -64,7 +62,7 @@ public class ChatRecorder
 		 // Output
 		 File dimDir = ChatAnnotator.dimensionDirectories.get(dimension);
 		 File jsonFile = new File(dimDir, "gimmickLog.json");
-		 outputJson(jsonFile, dimLog);
+		 FileOutput.outputJson(jsonFile, dimLog);
 	}
 
 	protected void outputPlayerJson(EntityPlayer player)
@@ -77,20 +75,6 @@ public class ChatRecorder
 		if (!logDir.exists()) logDir.mkdir();
 		File jsonFile = new File(logDir, uuid.toString() + ".json");
 
-		outputJson(jsonFile, jsonMap);
-	}
-
-	protected static void outputJson(File jsonFile, Object jsonValue)
-	{
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			 mapper.writerWithDefaultPrettyPrinter().writeValue(jsonFile, jsonValue);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-			System.out.println("Failed to process json");
-		} catch (IOException e) {
-	    	e.printStackTrace();
-			System.out.println("Failed to output JSON");
-		}
+		FileOutput.outputJson(jsonFile, jsonMap);
 	}
 }

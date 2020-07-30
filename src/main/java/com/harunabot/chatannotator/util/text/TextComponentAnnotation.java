@@ -105,6 +105,11 @@ public class TextComponentAnnotation extends TextComponentString
     	return componentString;
     }
 
+    public String getSender()
+    {
+    	return this.senderId;
+    }
+
     public String getTime()
     {
     	return this.time;

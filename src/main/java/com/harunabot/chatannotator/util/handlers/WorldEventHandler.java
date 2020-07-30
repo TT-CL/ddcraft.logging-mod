@@ -29,13 +29,15 @@ public class WorldEventHandler
 			// No log for nether and The end
 			return;
 		}
-		ChatAnnotator.annotationLogs.put(dimension, new AnnotationLog(dimension));
 
 		// dimension directory
 		String dirname = new SimpleDateFormat("yy-MM-dd_HH.mm.ss").format(new Date()) + "_" + dimension;
 		File dimDir = new File(ChatAnnotator.modDirectory, dirname);
 		dimDir.mkdir();
 		ChatAnnotator.dimensionDirectories.put(dimension, dimDir);
+
+		// AnnotationLog
+		ChatAnnotator.annotationLogs.put(dimension, new AnnotationLog(dimension));
 	}
 
 	@SubscribeEvent
