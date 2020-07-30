@@ -21,6 +21,8 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @Mod(modid = Reference.MOD_ID, name= Reference.NAME, version = Reference.VERSION)
 public class ChatAnnotator
@@ -36,6 +38,7 @@ public class ChatAnnotator
 	public static Logger LOGGER;
 
 	//public static ScreenRecorder SCREEN_RECORDER;
+	@SideOnly(Side.SERVER)
 	public static ChatRecorder CHAT_RECORDER;
 
 	// Directory for saving files
@@ -53,20 +56,8 @@ public class ChatAnnotator
 	public static void init(FMLInitializationEvent event)
 	{
 		proxy.init(event);
-
-		// TODO Later: move to serverside?
-		try {
-			modDirectory.mkdir();
-		}
-		catch (SecurityException e)
-		{
-			LOGGER.log(Level.ERROR, "Failed to create a directory");
-		}
-
 		// proxy?
 		ChatAnnotatorPacketHandler.init(event);
-
-		CHAT_RECORDER = new ChatRecorder();
 		ScreenRecorder.init();
 	}
 
@@ -74,8 +65,6 @@ public class ChatAnnotator
 	public static void PostInit(FMLPostInitializationEvent event)
 	{
 		proxy.postInit(event);
-
-
 	}
 
 }

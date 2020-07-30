@@ -13,7 +13,6 @@ public class RegistryHandler
 {
 	public static void preInitRegistries(FMLPreInitializationEvent event)
 	{
-		//BlockInit.registerBlocks();
 	}
 
 	public static void initRegistries(FMLInitializationEvent event)

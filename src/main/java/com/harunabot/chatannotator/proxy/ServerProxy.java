@@ -1,6 +1,12 @@
 package com.harunabot.chatannotator.proxy;
 
 
+import org.apache.logging.log4j.Level;
+
+import com.harunabot.chatannotator.ChatAnnotator;
+import com.harunabot.chatannotator.annotator.server.ChatRecorder;
+import com.harunabot.chatannotator.screenshot.ScreenRecorder;
+
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -21,6 +27,18 @@ public class ServerProxy extends CommonProxy
 	@Override
     public void init(FMLInitializationEvent event) {
 		super.init(event);
+
+		try
+		{
+
+			ChatAnnotator.modDirectory.mkdir();
+		}
+		catch (SecurityException e)
+		{
+			ChatAnnotator.LOGGER.log(Level.ERROR, "Failed to create a directory");
+		}
+
+		ChatAnnotator.CHAT_RECORDER = new ChatRecorder();
     }
 
 	@Override
