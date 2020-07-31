@@ -6,10 +6,10 @@ import java.util.Date;
 import java.util.Map;
 
 import com.harunabot.chatannotator.ChatAnnotator;
+import com.harunabot.chatannotator.screenshot.ScreenRecorder;
 import com.harunabot.chatannotator.server.AnnotationLog;
 
 import net.minecraft.world.World;
-import net.minecraftforge.client.event.RenderGameOverlayEvent.Chat;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -38,6 +38,9 @@ public class WorldEventHandler
 
 		// AnnotationLog
 		ChatAnnotator.annotationLogs.put(dimension, new AnnotationLog(dimension));
+
+		ScreenRecorder.SCREENSHOT_LOG.onCreateDimension(dimension);
+		ChatAnnotator.CHAT_RECORDER.onCreateDimension(dimension);
 	}
 
 	@SubscribeEvent
@@ -47,6 +50,10 @@ public class WorldEventHandler
 		int dimension = world.provider.getDimension();
 		Map<Integer, AnnotationLog> logs = ChatAnnotator.annotationLogs;
 		if (world.isRemote || !logs.containsKey(dimension)) return;
+
+		// refresh screenshots
+		ScreenRecorder.SCREENSHOT_LOG.onDestroyDimension(dimension);
+		ChatAnnotator.CHAT_RECORDER.onDestroyDimension(dimension);
 
 		// Annotation logs
 		logs.get(dimension).outputAnnotationFile();

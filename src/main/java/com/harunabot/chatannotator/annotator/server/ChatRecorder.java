@@ -20,21 +20,28 @@ public class ChatRecorder
 	public static final String STATUS_DIR_NAME = "logs";
 
 	// TODO: チャットアノテーションとの紐付け
-	// TODO: reset on dimension change
-	private Map<UUID, Map<Integer, ChatStatusJson>> chatStatuses = new HashMap<>();
+	private Map<Integer, Map<UUID, Map<Integer, ChatStatusJson>>> dimensionChatStatuses = new HashMap<>();
 
 	private Map<Integer, ArrayList<GimmickLogJson>> gimmickLogs = new HashMap<>();
 
-	public void refreshDimension(int dimension)
+	public void onCreateDimension(int dimension)
 	{
-		if (!gimmickLogs.containsKey(dimension)) return;
-
+		dimensionChatStatuses.put(dimension, new HashMap<>());
 		gimmickLogs.put(dimension, new ArrayList<>());
+	}
+
+	public void onDestroyDimension(int dimension)
+	{
+		dimensionChatStatuses.remove(dimension);
+		gimmickLogs.remove(dimension);
 	}
 
 	public void recordChatStatus(EntityPlayer player, BlockPos playerPos, Vec3d playerLook, BlockPos lookingBlockPos, String lookingBlockName)
 	{
+		int dimension = player.dimension;
 		UUID uuid = player.getUniqueID();
+		Map<UUID, Map<Integer, ChatStatusJson>> chatStatuses = dimensionChatStatuses.get(dimension);
+
 		if (!chatStatuses.containsKey(uuid))
 		{
 			chatStatuses.put(uuid, new HashMap<>());
@@ -51,10 +58,6 @@ public class ChatRecorder
 	public void recordGimmickLog(EntityPlayer player, BlockPos gimmickPos, ResourceLocation gimmickName, boolean isActivated)
 	{
 		int dimension = player.dimension;
-		if (!gimmickLogs.containsKey(dimension))
-		{
-			gimmickLogs.put(dimension, new ArrayList<>());
-		}
 
 		 ArrayList<GimmickLogJson> dimLog = gimmickLogs.get(dimension);
 		 dimLog.add(new GimmickLogJson(gimmickPos, gimmickName, isActivated, player, new Date()));
@@ -68,7 +71,8 @@ public class ChatRecorder
 	protected void outputPlayerJson(EntityPlayer player)
 	{
 		UUID uuid = player.getUniqueID();
-		Map<Integer, ChatStatusJson> jsonMap = chatStatuses.get(uuid);
+		int dimension = player.dimension;
+		Map<Integer, ChatStatusJson> jsonMap = dimensionChatStatuses.get(dimension).get(uuid);
 
 		File dimDir = ChatAnnotator.dimensionDirectories.get(player.dimension);
 		File logDir = new File(dimDir, STATUS_DIR_NAME);

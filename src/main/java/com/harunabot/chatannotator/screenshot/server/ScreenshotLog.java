@@ -1,47 +1,56 @@
 package com.harunabot.chatannotator.screenshot.server;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
-import javax.imageio.ImageIO;
-
-import org.apache.logging.log4j.Level;
-
 import com.harunabot.chatannotator.ChatAnnotator;
-import com.harunabot.chatannotator.screenshot.client.StandbyScreenshots;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 
 public class ScreenshotLog
 {
 	// TODO: チャット内容とimageIdの紐付け
-	private Map<UUID, Map<Integer, FragScreenshot>> playerScreenshots = new HashMap<UUID, Map<Integer, FragScreenshot>>();
+	private Map<Integer, Map<UUID, Map<Integer, FragScreenshot>>> dimensionShots = new HashMap<>();
 
+	public void onCreateDimension(int dimension)
+	{
+		dimensionShots.put(dimension, new HashMap<>());
+	}
+
+	public void onDestroyDimension(int dimension)
+	{
+		if (!dimensionShots.containsKey(dimension)) return;
+
+		dimensionShots.remove(dimension);
+		// TODO: log if something left?
+	}
+
+	// register new FragScreenshot to wait for fragments of the screenshot
 	public int reserveScreenshot(EntityPlayerMP player, int imageId, int parts, int length)
 	{
+		int dimension = player.dimension;
 		UUID uuid = player.getUniqueID();
-		if (!playerScreenshots.containsKey(uuid))
+		Map<UUID, Map<Integer, FragScreenshot>> playerShots = dimensionShots.get(dimension);
+		if (!playerShots.containsKey(uuid))
 		{
-			playerScreenshots.put(uuid, new HashMap<Integer, FragScreenshot>());
+			playerShots.put(uuid, new HashMap<>());
 		}
 
-		Map<Integer, FragScreenshot> screenshots = playerScreenshots.get(uuid);
+		Map<Integer, FragScreenshot> screenshots = playerShots.get(uuid);
 		screenshots.put(imageId, new FragScreenshot(parts, length));
+
 		return imageId;
 	}
 
 	public void saveSubData(EntityPlayerMP player, int imageId, int partId, byte[] subData)
 	{
+		int dimension = player.dimension;
 		UUID uuid = player.getUniqueID();
-		Map<Integer, FragScreenshot> screenshots = playerScreenshots.get(uuid);
+		Map<Integer, FragScreenshot> screenshots = dimensionShots.get(dimension).get(uuid);
 		FragScreenshot image = screenshots.get(imageId);
 		image.applySubData(partId, subData);
 
