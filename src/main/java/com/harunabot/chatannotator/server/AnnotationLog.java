@@ -28,12 +28,12 @@ import net.minecraft.entity.player.EntityPlayerMP;
  */
 public class AnnotationLog
 {
-	protected static final String DIR_NAME = "annotationLogs";
-	protected static final String CHATLOG_BASE_FNAME = "chatLog_";
-	protected static final String ANNOTATION_BASE_FNAME= "annotation_";
+	public static final String CHATLOG_FILENAME = "chatLog.log";
+	public static final String ANNOTATION_FILENAME = "annotation.json";
 
-	private final String logFilePath;
-	private final String annotationFilePath;
+	private final int dimension;
+	private final File logFile;
+
 	/** All Chats */
 	private List<TextComponentAnnotation> components;
 	/** Annotated chats */
@@ -42,38 +42,18 @@ public class AnnotationLog
 	private List<TextComponentAnnotation> unAnnotatedComponents;
 
 
-
-
-	public AnnotationLog()
+	public AnnotationLog(int dimension)
 	{
-		// TODO: separate by world
-		String date = new SimpleDateFormat("yy-MM-dd_HH.mm.ss").format(new Date());
-		this.logFilePath = DIR_NAME + "/" +  CHATLOG_BASE_FNAME + date + ".log";
-		this.annotationFilePath = DIR_NAME + "/" + ANNOTATION_BASE_FNAME + date + ".json";
+		this.dimension = dimension;
+		File dimDir = ChatAnnotator.dimensionDirectories.get(dimension);
+		this.logFile = new File(dimDir, CHATLOG_FILENAME);
+		FileOutput.createFile(logFile);
 
 		this.components = new ArrayList<>();
 		this.annotatedComponents = new HashMap<>();
 		this.unAnnotatedComponents = new ArrayList<>();
-
-		// Make output file
-		createOutputFile(DIR_NAME, logFilePath);
 	}
 
-	/**
-	 * Create output file for log
-	 */
-	protected static void createOutputFile(String directoryName, String filePath)
-	{
-		File dir = new File(directoryName);
-        File file = new File(filePath);
-        try {
-        	if(!dir.exists()) dir.mkdir();
-            file.createNewFile();
-            ChatAnnotator.LOGGER.log(Level.INFO, "Successfully created output file: " + filePath);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-	}
 
 	public void addNewChat(TextComponentAnnotation component)
 	{
@@ -82,29 +62,31 @@ public class AnnotationLog
 
 		String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
 		String output = time + " :[CHAT] " + component.toLogString();
-		writeFile(output, logFilePath, "");
+		FileOutput.appendFile(logFile, output);
 	}
 
 	public void outputAnnotationFile()
 	{
-		File outputFile = new File(annotationFilePath);
-		if(!outputFile.exists())
-		{
-			createOutputFile(DIR_NAME, annotationFilePath);
-		}
-
-		Map<String, List<String>> outputMap = new HashMap<>();
+		Map<String, List<ChatData>> outputMap = new HashMap<>();
 		for(TextComponentAnnotation component: components)
 		{
 			String key = component.getTime();
+			ChatData chatData = new ChatData(
+					component.getSenderAnnotation(),
+					component.getReceiverAnnotation(),
+					component.getSender(),
+					component.getTime(),
+					component.getText());
 			if(!outputMap.containsKey(key))
 			{
 				outputMap.put(key, new ArrayList<>());
 			}
-			outputMap.get(key).add(component.toLogString());
+			outputMap.get(key).add(chatData);
 		}
 
-		writeFile(outputMap.toString(), annotationFilePath, "Output file.");
+		File dimDir = ChatAnnotator.dimensionDirectories.get(dimension);
+		File jsonFile = new File(dimDir, ANNOTATION_FILENAME);
+		FileOutput.outputJson(jsonFile, outputMap);
 	}
 
 
@@ -129,32 +111,11 @@ public class AnnotationLog
 				this.annotatedComponents.put(component.getTime(), component);
 
 				String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
-				String output = time + " :[ANNOTATION] " + annotation.getName() +  "=>" + annotatedComponent.toLogString();
-				writeFile(output, logFilePath, "");
+				String output = time + " :[ANNOTATION] " + annotation.toString() +  "=>" + annotatedComponent.toLogString();
+				FileOutput.appendFile(logFile, output);
 
 				break;
 			}
-		}
-	}
-
-	protected void writeFile(String output, String filePath, String successLog)
-	{
-		PrintWriter pw = null;
-		try {
-			FileWriter fw = new FileWriter(filePath, true);
-			pw= new PrintWriter(new BufferedWriter(fw)) ;
-			pw.println(output);
-			pw.close();
-			if(!successLog.isEmpty())
-			{
-				ChatAnnotator.LOGGER.log(Level.INFO, successLog);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}finally {
-            if (pw != null) {
-                pw.close();
-            }
 		}
 	}
 }

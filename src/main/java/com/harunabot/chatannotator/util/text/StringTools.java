@@ -35,10 +35,10 @@ public class StringTools
     }
 
     /**
-     * Separate the String into 2 parts: one surrounded by symbols, and the other after that
+     * Separate the String into 2 parts: prefix surrounded by symbols, and the main body after that
      */
     // TODO: ava.lang.StringIndexOutOfBoundsException: String index out of range: -1 when command input
-    public static Pair<String, String> separateBySymbols(String str, char firstSymbol, char secondSymbol)
+    public static Pair<String, String> separatePrefixBySymbols(String str, char firstSymbol, char secondSymbol)
     {
     	String first;
     	String second;
@@ -50,9 +50,9 @@ public class StringTools
 		}
 		catch (IndexOutOfBoundsException e)
 		{
-			System.err.println(e);
+			// no prefix
 			first = "";
-			second = "";
+			second = str;
 		}
 
     	return Pair.of(first, second);

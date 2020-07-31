@@ -36,10 +36,6 @@ public class GuiAnnotationPopUp extends Gui
     /** The button that was just pressed. */
     protected GuiButton selectedButton;
 
-    /** position of component(got by org.lwjgl.input.Mouse.getX() or get y()) */
-    protected final int componentX;
-    protected final int componentY;
-
     /** base position(clicked position) */
     private int baseX;
 	private int baseY;
@@ -76,8 +72,6 @@ public class GuiAnnotationPopUp extends Gui
 
 		this.dialogueActs = DialogueAct.getList();
 		this.chatLineNumber = chatLineNumber;
-		this.componentX = mouseX;
-		this.componentY = mouseY;
 
 		// init buttons
 		setupButtons(this.baseX, this.baseY);
@@ -208,10 +202,10 @@ public class GuiAnnotationPopUp extends Gui
         	if(component != null && component instanceof TextComponentAnnotation)
         	{
         		TextComponentAnnotation componentAnnotation = (TextComponentAnnotation)component;
-	        	String msg = "[" + dialogueAct.getName() + "]" + componentAnnotation.toIdenticalString();
+        		int dimension = componentAnnotation.getDimension();
+        		String msg = String.format("[%s](%d)%s", dialogueAct.getName(), dimension, componentAnnotation.toIdenticalString());
 	        	msg = StringTools.deleteIllegalCharacters(msg);
-	        	// TODO: 別の形で送る
-	        	System.out.println(msg);
+	        	// TODO: 別の形で送る AnnotationHandlerみたいなの
 	        	parent.sendChatMessage(msg, false);
 
 	        	ChatAnnotator.LOGGER.log(Level.INFO, "Annotated chat: [annotation]" + dialogueAct.getName() + ", [chat]" + componentAnnotation.getText());

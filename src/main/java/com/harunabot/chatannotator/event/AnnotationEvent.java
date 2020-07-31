@@ -56,6 +56,11 @@ public class AnnotationEvent extends Event
     	return this.player;
     }
 
+    public int getDimension()
+    {
+    	return this.component.getDimension();
+    }
+
     public DialogueAct getSenderAnnotation()
     {
     	return this.component.getSenderAnnotation();
