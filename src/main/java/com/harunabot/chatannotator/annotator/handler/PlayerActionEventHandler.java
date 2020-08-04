@@ -3,7 +3,7 @@ package com.harunabot.chatannotator.annotator.handler;
 import java.util.Objects;
 
 import com.harunabot.chatannotator.ChatAnnotator;
-import com.harunabot.chatannotator.annotator.network.PlayerStateMessage;
+import com.harunabot.chatannotator.annotator.network.message.PlayerStateMessage;
 import com.harunabot.chatannotator.util.handlers.ChatAnnotatorPacketHandler;
 
 import net.minecraft.block.Block;
@@ -36,9 +36,12 @@ public class PlayerActionEventHandler
 			return;
 		}
 
+		String chatId = ChatAnnotator.CHAT_ID_MANAGER.getId(msg);
+
 		Minecraft mc = Minecraft.getMinecraft();
 		ChatAnnotatorPacketHandler.sendToServer(new PlayerStateMessage(mc.player, mc.world, mc.getRenderPartialTicks()));
 
+		ChatAnnotator.CHAT_ID_MANAGER.onSendChatMessage(msg);
 	}
 
 	@SubscribeEvent

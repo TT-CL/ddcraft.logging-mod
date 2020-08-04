@@ -1,4 +1,4 @@
-package com.harunabot.chatannotator.annotator.network;
+package com.harunabot.chatannotator.annotator.network.message;
 
 import java.nio.charset.Charset;
 

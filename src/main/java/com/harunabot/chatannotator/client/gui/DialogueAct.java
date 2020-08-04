@@ -63,6 +63,18 @@ public enum DialogueAct
 		return null;
 	}
 
+	public static DialogueAct convertFromId(int id)
+	{
+		for(DialogueAct dialogueAct:getList())
+		{
+			if(dialogueAct.id == id)
+			{
+				return dialogueAct;
+			}
+		}
+		return null;
+	}
+
 	public static List<DialogueAct> getList()
 	{
 		DialogueAct[] array = {QUESTION, SUGGEST, DialogueAct.GREETING,YES,DialogueAct.NO, CONVEY,EXCLAMATION, CORRECT};

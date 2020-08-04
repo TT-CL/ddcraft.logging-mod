@@ -1,5 +1,8 @@
 package com.harunabot.chatannotator.proxy;
 
+import com.harunabot.chatannotator.ChatAnnotator;
+import com.harunabot.chatannotator.annotator.handler.client.ChatIdManager;
+
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -20,6 +23,8 @@ public class ClientProxy extends CommonProxy
 	@Override
     public void init(FMLInitializationEvent event) {
 		super.init(event);
+
+		ChatAnnotator.CHAT_ID_MANAGER = new ChatIdManager();
     }
 
 	@Override

@@ -30,7 +30,6 @@ public class ServerProxy extends CommonProxy
 
 		try
 		{
-
 			ChatAnnotator.modDirectory.mkdir();
 		}
 		catch (SecurityException e)
