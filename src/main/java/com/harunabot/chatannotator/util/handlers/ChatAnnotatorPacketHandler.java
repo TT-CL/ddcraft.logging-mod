@@ -7,12 +7,15 @@ import com.harunabot.chatannotator.screenshot.network.HandlerScreenshotDataMessa
 import com.harunabot.chatannotator.screenshot.network.NotifyArrivalMessage;
 import com.harunabot.chatannotator.logger.network.handler.HandlerPlayerStateMessage;
 import com.harunabot.chatannotator.logger.network.message.PlayerStateMessage;
+import com.harunabot.chatannotator.network.ConfigMessage;
+import com.harunabot.chatannotator.network.HandlerConfigMessage;
 import com.harunabot.chatannotator.screenshot.network.HandlerNotifyArrivalMessage;
 import com.harunabot.chatannotator.screenshot.network.RequestScreenshotMessage;
 import com.harunabot.chatannotator.screenshot.network.ScreenshotDataMessage;
 import com.harunabot.chatannotator.screenshot.network.ScreenshotDataMessage;
 import com.harunabot.chatannotator.util.Reference;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -42,6 +45,9 @@ public class ChatAnnotatorPacketHandler
 
 		// Chat annotation packets
 		INSTANCE.registerMessage(HandlerPlayerStateMessage.class, PlayerStateMessage.class, discriminator++, Side.SERVER);
+
+		// Config packets
+		INSTANCE.registerMessage(HandlerConfigMessage.class, ConfigMessage.class, discriminator++, Side.CLIENT);
 	}
 
 	public static void sendToServer(IMessage message)
@@ -53,5 +59,16 @@ public class ChatAnnotatorPacketHandler
 		}
 
 		INSTANCE.sendToServer(message);
+	}
+
+	public static void sendToClient(IMessage message, EntityPlayerMP player)
+	{
+		if (Objects.isNull(INSTANCE))
+		{
+			System.err.println("Invalid access to network: mod not initialized");
+			return;
+		}
+
+		INSTANCE.sendTo(message, player);
 	}
 }
