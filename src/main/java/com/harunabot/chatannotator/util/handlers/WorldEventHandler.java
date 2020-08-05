@@ -13,10 +13,13 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @Mod.EventBusSubscriber
 public class WorldEventHandler
 {
+	@SideOnly(Side.SERVER)
 	@SubscribeEvent
 	public static void onStartGame(WorldEvent.Load event)
 	{
@@ -41,8 +44,10 @@ public class WorldEventHandler
 
 		ScreenRecorder.SCREENSHOT_LOG.onCreateDimension(dimension);
 		ChatAnnotator.CHAT_RECORDER.onCreateDimension(dimension);
+		ChatAnnotator.CHAT_ID_MANAGER_SERVER.onCreateDimension(dimension);
 	}
 
+	@SideOnly(Side.SERVER)
 	@SubscribeEvent
 	public static void onFinishGame(WorldEvent.Unload event)
 	{
@@ -54,6 +59,7 @@ public class WorldEventHandler
 		// refresh screenshots
 		ScreenRecorder.SCREENSHOT_LOG.onDestroyDimension(dimension);
 		ChatAnnotator.CHAT_RECORDER.onDestroyDimension(dimension);
+		ChatAnnotator.CHAT_ID_MANAGER_SERVER.onDestroyDimension(dimension);
 
 		// Annotation logs
 		logs.get(dimension).outputAnnotationFile();

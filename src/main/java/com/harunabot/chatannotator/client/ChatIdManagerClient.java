@@ -1,4 +1,4 @@
-package com.harunabot.chatannotator.annotator.handler.client;
+package com.harunabot.chatannotator.client;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -8,7 +8,7 @@ import java.util.Objects;
 
 
 // Manages the serial Id of the unsent chats
-public class ChatIdManager
+public class ChatIdManagerClient
 {
 	// how long the substr of the msg in serial ids should be
 	public static final int ID_SUBSTR_LENGTH = 4;
@@ -16,7 +16,7 @@ public class ChatIdManager
 	// messages that are not sent but have id
 	private Map<String, String> messageIds;
 
-	public ChatIdManager()
+	public ChatIdManagerClient()
 	{
 		messageIds = new HashMap<>();
 	}
@@ -39,7 +39,7 @@ public class ChatIdManager
 	}
 
 	// return SerialId for a chat as a date
-	protected String getChatSerialId(String msg)
+	protected static String getChatSerialId(String msg)
 	{
 		String subMsg = msg.substring(0, Math.min(ID_SUBSTR_LENGTH, msg.length()));
 		String date = new SimpleDateFormat("ddHHmmss").format(new Date());

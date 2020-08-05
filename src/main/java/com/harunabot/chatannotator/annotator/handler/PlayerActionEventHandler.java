@@ -36,12 +36,12 @@ public class PlayerActionEventHandler
 			return;
 		}
 
-		String chatId = ChatAnnotator.CHAT_ID_MANAGER.getId(msg);
+		String chatId = ChatAnnotator.CHAT_ID_MANAGER_CLIENT.getId(msg);
 
 		Minecraft mc = Minecraft.getMinecraft();
-		ChatAnnotatorPacketHandler.sendToServer(new PlayerStateMessage(mc.player, mc.world, mc.getRenderPartialTicks()));
+		ChatAnnotatorPacketHandler.sendToServer(new PlayerStateMessage(chatId, mc.player, mc.world, mc.getRenderPartialTicks()));
 
-		ChatAnnotator.CHAT_ID_MANAGER.onSendChatMessage(msg);
+		ChatAnnotator.CHAT_ID_MANAGER_CLIENT.onSendChatMessage(msg);
 	}
 
 	@SubscribeEvent

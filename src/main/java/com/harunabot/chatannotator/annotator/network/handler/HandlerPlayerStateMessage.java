@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Level;
 import com.harunabot.chatannotator.ChatAnnotator;
 import com.harunabot.chatannotator.annotator.network.message.PlayerStateMessage;
 import com.harunabot.chatannotator.annotator.server.ChatRecorder;
-import com.harunabot.chatannotator.annotator.server.ChatStatusJson;
+import com.harunabot.chatannotator.annotator.server.json.ChatStatusJson;
 import com.harunabot.chatannotator.screenshot.ScreenRecorder;
 
 import net.minecraft.entity.player.EntityPlayerMP;
