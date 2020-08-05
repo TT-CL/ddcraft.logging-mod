@@ -1,4 +1,4 @@
-package com.harunabot.chatannotator.annotator.server;
+package com.harunabot.chatannotator.logger.server;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.harunabot.chatannotator.ChatAnnotator;
-import com.harunabot.chatannotator.annotator.server.json.ChatStatusJson;
-import com.harunabot.chatannotator.annotator.server.json.GimmickLogJson;
+import com.harunabot.chatannotator.logger.server.json.ChatStatusJson;
+import com.harunabot.chatannotator.logger.server.json.GimmickLogJson;
 import com.harunabot.chatannotator.server.FileOutput;
 
 import net.minecraft.entity.player.EntityPlayer;

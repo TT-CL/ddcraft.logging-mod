@@ -1,11 +1,11 @@
-package com.harunabot.chatannotator.annotator.network.handler;
+package com.harunabot.chatannotator.logger.network.handler;
 
 import org.apache.logging.log4j.Level;
 
 import com.harunabot.chatannotator.ChatAnnotator;
-import com.harunabot.chatannotator.annotator.network.message.PlayerStateMessage;
-import com.harunabot.chatannotator.annotator.server.ChatRecorder;
-import com.harunabot.chatannotator.annotator.server.json.ChatStatusJson;
+import com.harunabot.chatannotator.logger.network.message.PlayerStateMessage;
+import com.harunabot.chatannotator.logger.server.ChatRecorder;
+import com.harunabot.chatannotator.logger.server.json.ChatStatusJson;
 import com.harunabot.chatannotator.screenshot.ScreenRecorder;
 
 import net.minecraft.entity.player.EntityPlayerMP;

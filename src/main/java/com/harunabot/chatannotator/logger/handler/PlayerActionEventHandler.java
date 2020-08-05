@@ -1,9 +1,9 @@
-package com.harunabot.chatannotator.annotator.handler;
+package com.harunabot.chatannotator.logger.handler;
 
 import java.util.Objects;
 
 import com.harunabot.chatannotator.ChatAnnotator;
-import com.harunabot.chatannotator.annotator.network.message.PlayerStateMessage;
+import com.harunabot.chatannotator.logger.network.message.PlayerStateMessage;
 import com.harunabot.chatannotator.util.handlers.ChatAnnotatorPacketHandler;
 
 import net.minecraft.block.Block;

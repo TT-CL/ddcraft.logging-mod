@@ -7,8 +7,8 @@ import java.util.Map;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 
-import com.harunabot.chatannotator.annotator.server.ChatRecorder;
 import com.harunabot.chatannotator.client.ChatIdManagerClient;
+import com.harunabot.chatannotator.logger.server.ChatRecorder;
 import com.harunabot.chatannotator.proxy.CommonProxy;
 import com.harunabot.chatannotator.screenshot.ScreenRecorder;
 import com.harunabot.chatannotator.server.AnnotationLog;

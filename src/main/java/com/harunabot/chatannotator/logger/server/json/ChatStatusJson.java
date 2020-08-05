@@ -1,4 +1,4 @@
-package com.harunabot.chatannotator.annotator.server.json;
+package com.harunabot.chatannotator.logger.server.json;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
