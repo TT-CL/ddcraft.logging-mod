@@ -1,4 +1,4 @@
-package com.harunabot.chatannotator.logger.network.message;
+package com.harunabot.chatannotator.logger.network;
 
 import java.nio.charset.Charset;
 
@@ -8,6 +8,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 
 /*
@@ -73,22 +74,17 @@ public class PlayerStateMessage implements IMessage
 	@Override
 	public void fromBytes(ByteBuf buf)
 	{
-		int strlen;
-
-		strlen = buf.readInt();
-		serialId = buf.readCharSequence(strlen, Charset.defaultCharset()).toString();
+		serialId = ByteBufUtils.readUTF8String(buf);
 		playerPos = bytesToPos(buf);
 		playerLook = bytesToVec3d(buf);
 		lookingAtPos = bytesToPos(buf);
-		strlen = buf.readInt();
-		lookingAtName = buf.readCharSequence(strlen, Charset.defaultCharset()).toString();
+		lookingAtName = serialId = ByteBufUtils.readUTF8String(buf);
 	}
 
 	@Override
 	public void toBytes(ByteBuf buf)
 	{
-		buf.writeInt(serialId.length());
-		buf.writeCharSequence(serialId, Charset.defaultCharset());
+		ByteBufUtils.writeUTF8String(buf, serialId);
 
 		buf.writeInt(playerPos.getX());
 		buf.writeInt(playerPos.getY());
@@ -102,8 +98,7 @@ public class PlayerStateMessage implements IMessage
 		buf.writeInt(lookingAtPos.getY());
 		buf.writeInt(lookingAtPos.getZ());
 
-		buf.writeInt(lookingAtName.length());
-		buf.writeCharSequence(lookingAtName, Charset.defaultCharset());
+		ByteBufUtils.writeUTF8String(buf, lookingAtName);
 	}
 
 	private static BlockPos bytesToPos(ByteBuf buf)

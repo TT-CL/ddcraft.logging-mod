@@ -1,14 +1,15 @@
-package com.harunabot.chatannotator.util.handlers;
+package com.harunabot.chatannotator.util.handlers.event;
 
-import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 
 import com.harunabot.chatannotator.ChatAnnotator;
-import com.harunabot.chatannotator.client.gui.DialogueAct;
-import com.harunabot.chatannotator.server.AnnotationLog;
+import com.harunabot.chatannotator.annotator.DialogueAct;
+import com.harunabot.chatannotator.logger.network.PlayerStateMessage;
+import com.harunabot.chatannotator.screenshot.ScreenRecorder;
+import com.harunabot.chatannotator.util.handlers.ChatAnnotatorPacketHandler;
 import com.harunabot.chatannotator.util.text.StringTools;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
 
@@ -18,10 +19,9 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.world.World;
+import net.minecraftforge.client.event.ClientChatEvent;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.event.ServerChatEvent;
-import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -182,12 +182,12 @@ public class ChatEventHandler
 		// Separate the message into the annotation part & main part
 		String rawMsg = msgComponent.getText();
 		Pair<String, String> separatedMsg = StringTools.separatePrefixBySymbols(rawMsg, '<', '>');
-		String annotationStr = separatedMsg.getLeft();
+		int annotationId = Integer.parseInt(separatedMsg.getLeft());
 		String msg = separatedMsg.getRight();
 		DialogueAct annotation;
 
 		// Resolve annotation
-		annotation = DialogueAct.convertFromName(annotationStr);
+		annotation = DialogueAct.convertFromId(annotationId);
 		if (annotation == null)
 		{
 			ChatAnnotator.LOGGER.log(Level.ERROR, "Something wrong with the chat msg: " + rawMsg);

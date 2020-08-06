@@ -1,9 +1,8 @@
-package com.harunabot.chatannotator.logger.network.handler;
+package com.harunabot.chatannotator.logger.network;
 
 import org.apache.logging.log4j.Level;
 
 import com.harunabot.chatannotator.ChatAnnotator;
-import com.harunabot.chatannotator.logger.network.message.PlayerStateMessage;
 import com.harunabot.chatannotator.logger.server.ChatRecorder;
 import com.harunabot.chatannotator.logger.server.json.ChatStatusJson;
 import com.harunabot.chatannotator.screenshot.ScreenRecorder;

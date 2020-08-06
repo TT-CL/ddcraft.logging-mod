@@ -4,7 +4,7 @@ import org.apache.logging.log4j.Level;
 
 import com.harunabot.chatannotator.ChatAnnotator;
 import com.harunabot.chatannotator.common.config.AnnotationConfig;
-import com.harunabot.chatannotator.util.handlers.ConfigSyncEventHandler;
+import com.harunabot.chatannotator.util.handlers.event.ConfigSyncEventHandler;
 
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;

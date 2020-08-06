@@ -1,4 +1,4 @@
-package com.harunabot.chatannotator.client.gui;
+package com.harunabot.chatannotator.annotator.client.gui;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Level;
 
 import com.google.common.collect.Lists;
 import com.harunabot.chatannotator.ChatAnnotator;
+import com.harunabot.chatannotator.annotator.DialogueAct;
 import com.harunabot.chatannotator.util.text.StringTools;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
 
@@ -185,18 +186,18 @@ public class GuiAnnotationPopUp extends Gui
 
 	private void changeComponentColor(Boolean annotating)
 	{
-        if(this.mc.ingameGUI.getChatGUI() instanceof MyGuiNewChat)
+        if(this.mc.ingameGUI.getChatGUI() instanceof AlterGuiNewChat)
         {
-        	MyGuiNewChat guiNewChat = (MyGuiNewChat)this.mc.ingameGUI.getChatGUI();
+        	AlterGuiNewChat guiNewChat = (AlterGuiNewChat)this.mc.ingameGUI.getChatGUI();
         	guiNewChat.changeChatComponentColor(this.chatLineNumber, annotating);
         }
 	}
 
 	protected void annotateComponent(DialogueAct dialogueAct)
 	{
-        if(this.mc.ingameGUI.getChatGUI() instanceof MyGuiNewChat)
+        if(this.mc.ingameGUI.getChatGUI() instanceof AlterGuiNewChat)
         {
-        	MyGuiNewChat guiNewChat = (MyGuiNewChat)this.mc.ingameGUI.getChatGUI();
+        	AlterGuiNewChat guiNewChat = (AlterGuiNewChat)this.mc.ingameGUI.getChatGUI();
         	ITextComponent component = guiNewChat.annotateChatComponent(this.chatLineNumber, dialogueAct);
 
         	if(component != null && component instanceof TextComponentAnnotation)

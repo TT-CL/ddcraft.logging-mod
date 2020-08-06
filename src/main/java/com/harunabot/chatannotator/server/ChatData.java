@@ -1,8 +1,7 @@
 package com.harunabot.chatannotator.server;
 
 import java.util.Objects;
-
-import com.harunabot.chatannotator.client.gui.DialogueAct;
+import com.harunabot.chatannotator.annotator.DialogueAct;
 
 // ゆくゆくはここに全部情報を統一させたいところ…
 public class ChatData

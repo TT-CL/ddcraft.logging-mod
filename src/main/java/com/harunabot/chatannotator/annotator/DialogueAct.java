@@ -1,4 +1,4 @@
-package com.harunabot.chatannotator.client.gui;
+package com.harunabot.chatannotator.annotator;
 
 import java.util.ArrayList;
 import java.util.List;

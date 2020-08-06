@@ -1,7 +1,8 @@
-package com.harunabot.chatannotator.util.handlers;
+package com.harunabot.chatannotator.util.handlers.event;
 
 import com.harunabot.chatannotator.common.config.AnnotationConfig;
 import com.harunabot.chatannotator.network.ConfigMessage;
+import com.harunabot.chatannotator.util.handlers.ChatAnnotatorPacketHandler;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;

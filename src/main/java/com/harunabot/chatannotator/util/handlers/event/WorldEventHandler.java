@@ -1,4 +1,4 @@
-package com.harunabot.chatannotator.util.handlers;
+package com.harunabot.chatannotator.util.handlers.event;
 
 import java.io.File;
 import java.text.SimpleDateFormat;

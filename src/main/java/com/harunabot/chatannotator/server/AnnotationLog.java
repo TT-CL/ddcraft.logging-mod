@@ -17,7 +17,7 @@ import javax.annotation.Nullable;
 import org.apache.logging.log4j.Level;
 
 import com.harunabot.chatannotator.ChatAnnotator;
-import com.harunabot.chatannotator.client.gui.DialogueAct;
+import com.harunabot.chatannotator.annotator.DialogueAct;
 import com.harunabot.chatannotator.common.ChatAnnotatorHooks;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
 

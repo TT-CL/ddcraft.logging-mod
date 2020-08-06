@@ -1,5 +1,6 @@
-package com.harunabot.chatannotator.client.gui;
+package com.harunabot.chatannotator.annotator.client.gui;
 
+import com.harunabot.chatannotator.annotator.DialogueAct;
 import com.harunabot.chatannotator.util.Reference;
 
 import net.minecraft.client.Minecraft;
@@ -17,7 +18,7 @@ public class GuiAnnotationButton extends GuiButton
 
 	protected final ResourceLocation ICON_TEXTURE;
 
-	protected final DialogueAct dialogueAct;
+	public final DialogueAct dialogueAct;
 
 	public GuiAnnotationButton(int buttonId, int x, int y, DialogueAct dialogueAct)
 	{

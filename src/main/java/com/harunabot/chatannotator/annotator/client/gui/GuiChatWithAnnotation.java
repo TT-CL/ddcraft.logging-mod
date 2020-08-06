@@ -1,4 +1,4 @@
-package com.harunabot.chatannotator.client.gui;
+package com.harunabot.chatannotator.annotator.client.gui;
 
 import java.io.IOException;
 import java.util.List;
@@ -8,6 +8,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Mouse;
 
+import com.harunabot.chatannotator.ChatAnnotator;
+import com.harunabot.chatannotator.annotator.DialogueAct;
 import com.harunabot.chatannotator.screenshot.ScreenRecorder;
 import com.harunabot.chatannotator.util.text.StringTools;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
@@ -114,13 +116,8 @@ public class GuiChatWithAnnotation extends GuiChat
     	// success
     	inputFieldText = "";
     	// TODO: チャットの形式を変える
-    	// 受け手を変えないといけないので大変
-    	// NetworkManagerとか
-    	msg = "<" + activatedButton.displayString + ">" + msg;
+    	msg = "<" + activatedButton.dialogueAct.getId() + ">" + msg;
     	super.sendChatMessage(msg);
-
-    	// send screenshot together
-    	ScreenRecorder.reserveScreenshot();
     }
 
     // @Override
@@ -148,7 +145,7 @@ public class GuiChatWithAnnotation extends GuiChat
 
     	if(mouseButton == 0)
     	{
-        	MyGuiNewChat guiNewChat = (MyGuiNewChat) this.mc.ingameGUI.getChatGUI();
+        	AlterGuiNewChat guiNewChat = (AlterGuiNewChat) this.mc.ingameGUI.getChatGUI();
 
     		if(Objects.nonNull(this.annotationPopUp))
     		{
@@ -192,7 +189,7 @@ public class GuiChatWithAnnotation extends GuiChat
         // Note: Don't need AnnotationClickEvent instance; it's just for checking
 
         // Show GUI
-        MyGuiNewChat guiNewChat = (MyGuiNewChat) this.mc.ingameGUI.getChatGUI();
+        AlterGuiNewChat guiNewChat = (AlterGuiNewChat) this.mc.ingameGUI.getChatGUI();
         int chatlineNumber = guiNewChat.getChatLineNumber(Mouse.getX(), Mouse.getY());
         if (chatlineNumber < 0) return false;
         this.annotationPopUp = new GuiAnnotationPopUp(mc, this, this.lastClickedX, this.lastClickedY, (TextComponentAnnotation) component, Mouse.getX(), Mouse.getY(), chatlineNumber);
