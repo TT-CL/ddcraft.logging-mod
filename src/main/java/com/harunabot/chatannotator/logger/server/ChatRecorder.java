@@ -1,4 +1,4 @@
-package com.harunabot.chatannotator.annotator.server;
+package com.harunabot.chatannotator.logger.server;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.harunabot.chatannotator.ChatAnnotator;
+import com.harunabot.chatannotator.logger.server.json.ChatStatusJson;
+import com.harunabot.chatannotator.logger.server.json.GimmickLogJson;
 import com.harunabot.chatannotator.server.FileOutput;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -36,7 +38,7 @@ public class ChatRecorder
 		gimmickLogs.remove(dimension);
 	}
 
-	public void recordChatStatus(EntityPlayer player, BlockPos playerPos, Vec3d playerLook, BlockPos lookingBlockPos, String lookingBlockName)
+	public void recordChatStatus(EntityPlayer player, String serialId, BlockPos playerPos, Vec3d playerLook, BlockPos lookingBlockPos, String lookingBlockName)
 	{
 		int dimension = player.dimension;
 		UUID uuid = player.getUniqueID();
@@ -48,8 +50,7 @@ public class ChatRecorder
 		}
 
 		 Map<Integer, ChatStatusJson> playerLogs = chatStatuses.get(uuid);
-		 // TODO: synchronize id & time with other chatlogs
-		 int chatId = playerLogs.size();
+		 int chatId = ChatAnnotator.CHAT_ID_MANAGER_SERVER.getId(player, serialId);
 		 playerLogs.put(chatId, new ChatStatusJson(chatId, new Date(), playerPos, playerLook, lookingBlockPos, lookingBlockName));
 
 		 outputPlayerJson(player);

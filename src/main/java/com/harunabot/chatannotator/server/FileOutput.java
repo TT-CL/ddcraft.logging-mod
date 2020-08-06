@@ -15,6 +15,7 @@ public class FileOutput
 {
 	public static boolean outputJson(File jsonFile, Object jsonValue)
 	{
+		boolean isNew = !jsonFile.exists();
 		ObjectMapper mapper = new ObjectMapper();
 
 		try {
@@ -25,7 +26,10 @@ public class FileOutput
 			return false;
 		}
 
-		ChatAnnotator.LOGGER.log(Level.INFO, "Created file: " + jsonFile.toString());
+		if (isNew)
+		{
+			ChatAnnotator.LOGGER.log(Level.INFO, "Created file: " + jsonFile.toString());
+		}
 		return true;
 	}
 

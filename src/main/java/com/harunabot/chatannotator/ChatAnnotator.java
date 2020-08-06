@@ -7,10 +7,13 @@ import java.util.Map;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 
-import com.harunabot.chatannotator.annotator.server.ChatRecorder;
+import com.harunabot.chatannotator.annotator.server.AnnotationLog;
+import com.harunabot.chatannotator.annotator.server.AnnotationRecorder;
+import com.harunabot.chatannotator.client.ChatIdManagerClient;
+import com.harunabot.chatannotator.logger.server.ChatRecorder;
 import com.harunabot.chatannotator.proxy.CommonProxy;
 import com.harunabot.chatannotator.screenshot.ScreenRecorder;
-import com.harunabot.chatannotator.server.AnnotationLog;
+import com.harunabot.chatannotator.server.ChatIdManagerServer;
 import com.harunabot.chatannotator.util.Reference;
 import com.harunabot.chatannotator.util.handlers.ChatAnnotatorPacketHandler;
 
@@ -33,13 +36,21 @@ public class ChatAnnotator
 	@SidedProxy(clientSide = Reference.CLIENT_PROXY_CLASS, serverSide = Reference.SERVER_PROXY_CLASS)
 	public static CommonProxy proxy;
 
-	public static Map<Integer, AnnotationLog> annotationLogs = new HashMap<>();
-
 	public static Logger LOGGER;
 
 	//public static ScreenRecorder SCREEN_RECORDER;
 	@SideOnly(Side.SERVER)
 	public static ChatRecorder CHAT_RECORDER;
+
+	@SideOnly(Side.SERVER)
+	public static AnnotationRecorder ANNOTATION_RECORDER;
+
+	@SideOnly(Side.SERVER)
+	public static ChatIdManagerServer CHAT_ID_MANAGER_SERVER;
+
+	@SideOnly(Side.CLIENT)
+	public static ChatIdManagerClient CHAT_ID_MANAGER_CLIENT;
+
 
 	// Directory for saving files
 	public static final File modDirectory = new File(Reference.MOD_ID);
@@ -56,6 +67,7 @@ public class ChatAnnotator
 	public static void init(FMLInitializationEvent event)
 	{
 		proxy.init(event);
+
 		// proxy?
 		ChatAnnotatorPacketHandler.init(event);
 		ScreenRecorder.init();

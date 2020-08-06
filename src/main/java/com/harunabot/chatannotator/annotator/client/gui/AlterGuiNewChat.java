@@ -1,4 +1,4 @@
-package com.harunabot.chatannotator.client.gui;
+package com.harunabot.chatannotator.annotator.client.gui;
 
 import java.util.List;
 
@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.harunabot.chatannotator.annotator.DialogueAct;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
 
 import net.minecraft.client.Minecraft;
@@ -27,7 +28,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  */
 // TODO: should use something other than reflection to make this mod compatible with other mods
 @SideOnly(Side.CLIENT)
-public class MyGuiNewChat extends GuiNewChat
+public class AlterGuiNewChat extends GuiNewChat
 {
     private static final Logger LOGGER = LogManager.getLogger();
     private final Minecraft mc;
@@ -46,7 +47,7 @@ public class MyGuiNewChat extends GuiNewChat
     protected static final int SCROLLPOS_FIELD_INDEX = 5;
     protected static final int ISSCROLLED_FIELD_INDEX = 6;
 
-	public MyGuiNewChat(Minecraft mcIn)
+	public AlterGuiNewChat(Minecraft mcIn)
 	{
 		super(mcIn);
 		this.mc = mcIn;
@@ -83,7 +84,7 @@ public class MyGuiNewChat extends GuiNewChat
 
 		for (int i = chatLines.size() - 1; i >= 0; --i)
 		{
-		    MyChatLine chatline = (MyChatLine) chatLines.get(i);
+		    AlterChatLine chatline = (AlterChatLine) chatLines.get(i);
 		    this.setChatLine(chatline.getChatComponent(), chatline.getChatLineID(), chatline.getUpdatedCounter(), true, chatline.getChatLineNumber());
 		}
     }
@@ -104,7 +105,7 @@ public class MyGuiNewChat extends GuiNewChat
 	        }
 
 	        int i = MathHelper.floor((float)this.getChatWidth() / this.getChatScale());
-	        List<ITextComponent> list = MyGuiUtilRenderComponents.splitText(chatComponent, i, this.mc.fontRenderer, false, false);
+	        List<ITextComponent> list = AlterGuiUtilRenderComponents.splitText(chatComponent, i, this.mc.fontRenderer, false, false);
 	        boolean flag = this.getChatOpen();
 
 	        for (ITextComponent itextcomponent : list)
@@ -115,7 +116,7 @@ public class MyGuiNewChat extends GuiNewChat
 	                this.scroll(1);
 	            }
 
-	            this.drawnChatLines.add(0, new MyChatLine(updateCounter, itextcomponent, chatLineId, chatLineNumber));
+	            this.drawnChatLines.add(0, new AlterChatLine(updateCounter, itextcomponent, chatLineId, chatLineNumber));
 	        }
 
 	        while (drawnChatLines.size() > 100)
@@ -125,7 +126,7 @@ public class MyGuiNewChat extends GuiNewChat
 
 	        if (!displayOnly)
 	        {
-	            this.chatLines.add(0, new MyChatLine(updateCounter, chatComponent, chatLineId, chatLineNumber));
+	            this.chatLines.add(0, new AlterChatLine(updateCounter, chatComponent, chatLineId, chatLineNumber));
 
 	            while (this.chatLines.size() > 100)
 	            {
@@ -176,9 +177,9 @@ public class MyGuiNewChat extends GuiNewChat
 
 	        ChatLine chatline = this.drawnChatLines.get(i1);
 
-	        if(chatline instanceof MyChatLine)
+	        if(chatline instanceof AlterChatLine)
 	        {
-	        	return ((MyChatLine)chatline).getChatLineNumber();
+	        	return ((AlterChatLine)chatline).getChatLineNumber();
 	        }
 
 
@@ -199,12 +200,12 @@ public class MyGuiNewChat extends GuiNewChat
 
         for (int i = this.chatLines.size() - 1; i >= 0; --i)
         {
-        	MyChatLine chatLine = (MyChatLine) chatLines.get(i);
+        	AlterChatLine chatLine = (AlterChatLine) chatLines.get(i);
         	if(chatLine.getChatLineNumber() == chatLineNum)
         	{
         		ITextComponent component = _annotateChatComponent(chatLine.getChatComponent(), annotation);
         		this.chatLines.remove(i);
-		    	this.chatLines.add(i, new MyChatLine(chatLine.getUpdatedCounter(), component, chatLine.getChatLineID(), chatLine.getChatLineNumber()));
+		    	this.chatLines.add(i, new AlterChatLine(chatLine.getUpdatedCounter(), component, chatLine.getChatLineID(), chatLine.getChatLineNumber()));
 		    	refreshChat();
         		return findComponentAnnotation(component);
         	}
@@ -243,12 +244,12 @@ public class MyGuiNewChat extends GuiNewChat
 
         for (int i = this.chatLines.size() - 1; i >= 0; --i)
         {
-        	MyChatLine chatLine = (MyChatLine) chatLines.get(i);
+        	AlterChatLine chatLine = (AlterChatLine) chatLines.get(i);
         	if(chatLine.getChatLineNumber() == chatLineNum)
         	{
         		ITextComponent component = _changeChatComponentColor(chatLine.getChatComponent(), annotating);
         		this.chatLines.remove(i);
-		    	this.chatLines.add(i, new MyChatLine(chatLine.getUpdatedCounter(), component, chatLine.getChatLineID(), chatLine.getChatLineNumber()));
+		    	this.chatLines.add(i, new AlterChatLine(chatLine.getUpdatedCounter(), component, chatLine.getChatLineID(), chatLine.getChatLineNumber()));
 		    	refreshChat();
 
         		return findComponentAnnotation(component);

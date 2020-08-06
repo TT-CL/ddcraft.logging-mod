@@ -1,10 +1,8 @@
-package com.harunabot.chatannotator.annotator.handler;
+package com.harunabot.chatannotator.util.handlers.event;
 
 import java.util.Objects;
 
 import com.harunabot.chatannotator.ChatAnnotator;
-import com.harunabot.chatannotator.annotator.network.PlayerStateMessage;
-import com.harunabot.chatannotator.util.handlers.ChatAnnotatorPacketHandler;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockButton;
@@ -12,10 +10,8 @@ import net.minecraft.block.BlockDoor;
 import net.minecraft.block.BlockLever;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.client.event.ClientChatEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -25,22 +21,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @EventBusSubscriber
 public class PlayerActionEventHandler
 {
-	@SubscribeEvent
-	@SideOnly(Side.CLIENT)
-	public static void onClientChat(ClientChatEvent event)
-	{
-		String msg = event.getMessage();
-		if (msg.startsWith("/"))
-		{
-			// ignore command
-			return;
-		}
-
-		Minecraft mc = Minecraft.getMinecraft();
-		ChatAnnotatorPacketHandler.sendToServer(new PlayerStateMessage(mc.player, mc.world, mc.getRenderPartialTicks()));
-
-	}
-
 	@SubscribeEvent
 	@SideOnly(Side.SERVER)
 	public static void onRightClickBlock(RightClickBlock event)

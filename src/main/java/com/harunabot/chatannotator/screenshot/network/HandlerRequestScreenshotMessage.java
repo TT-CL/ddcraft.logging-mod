@@ -17,7 +17,7 @@ public class HandlerRequestScreenshotMessage implements IMessageHandler<RequestS
 	@Override
 	public IMessage onMessage(RequestScreenshotMessage message, MessageContext ctx)
 	{
-		ScreenRecorder.SCREENSHOT_HOLDER.sendSubScreenShotMessages(message.imageId);
+		ScreenRecorder.SCREENSHOT_HOLDER.sendSubScreenShotMessages(message.serialId);
 
 		return null;
 	}

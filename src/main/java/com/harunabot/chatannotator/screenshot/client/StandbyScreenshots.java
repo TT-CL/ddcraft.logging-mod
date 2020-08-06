@@ -29,18 +29,17 @@ public class StandbyScreenshots
 {
 	public static final int PART_SIZE = 30000;
 
-	private int imageId;
-	private int getNextImageId()
-	{
-		return imageId++;
-	}
+	private Map<String, byte[]> imageBytes;
 
-	private Map<Integer, byte[]> imageBytes = new HashMap<Integer, byte[]>();
+	public StandbyScreenshots()
+	{
+		imageBytes = new HashMap<>();
+	}
 
 	/**
 	 * Convert BufferedImage to byte array, store them and notify server
 	 */
-	public NotifyArrivalMessage registerImage(BufferedImage screenshot)
+	public NotifyArrivalMessage registerImage(String serialId, BufferedImage screenshot)
 	{
 		byte[] data;
 
@@ -53,20 +52,19 @@ public class StandbyScreenshots
 		catch( IOException e )
 		{
 			ChatAnnotator.LOGGER.log(Level.ERROR, "Failed to register screenshot.");
-			return new NotifyArrivalMessage(-1, 0, 0);
+			return new NotifyArrivalMessage("", 0, 0);
 		}
 
-		int imageId = getNextImageId();
 		int length = data.length;
 		int parts = (int)(Math.ceil(length/(double)PART_SIZE));
-		imageBytes.put(imageId, data);
+		imageBytes.put(serialId, data);
 
-		return new NotifyArrivalMessage(imageId, parts, length);
+		return new NotifyArrivalMessage(serialId, parts, length);
 	}
 
-	public void sendSubScreenShotMessages(int imageId)
+	public void sendSubScreenShotMessages(String serialId)
 	{
-		byte[] data = imageBytes.get(imageId);
+		byte[] data = imageBytes.get(serialId);
 		int parts = (int)(Math.ceil(data.length/(double)PART_SIZE));
 
         int from, to;
@@ -76,11 +74,11 @@ public class StandbyScreenshots
             to = Math.min(from + PART_SIZE, data.length);
             byte[] subdata = Arrays.copyOfRange(data, from, to);
 
-            ScreenshotDataMessage message = new ScreenshotDataMessage(imageId, i, subdata);
+            ScreenshotDataMessage message = new ScreenshotDataMessage(serialId, i, subdata);
             ChatAnnotatorPacketHandler.sendToServer(message);
         }
 
         // release
-        imageBytes.remove(imageId);
+        imageBytes.remove(serialId);
 	}
 }

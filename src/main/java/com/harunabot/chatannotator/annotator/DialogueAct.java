@@ -1,4 +1,4 @@
-package com.harunabot.chatannotator.client.gui;
+package com.harunabot.chatannotator.annotator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +56,18 @@ public enum DialogueAct
 		for(DialogueAct dialogueAct:getList())
 		{
 			if(dialogueAct.name.equals(name))
+			{
+				return dialogueAct;
+			}
+		}
+		return null;
+	}
+
+	public static DialogueAct convertFromId(int id)
+	{
+		for(DialogueAct dialogueAct:getList())
+		{
+			if(dialogueAct.id == id)
 			{
 				return dialogueAct;
 			}

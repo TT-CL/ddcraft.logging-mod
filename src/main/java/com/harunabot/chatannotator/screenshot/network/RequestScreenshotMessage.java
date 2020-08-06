@@ -4,6 +4,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import io.netty.buffer.ByteBuf;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 
 /*
@@ -11,33 +12,31 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
  */
 public class RequestScreenshotMessage implements IMessage
 {
-	int imageId;
+	String serialId;
 
 	public RequestScreenshotMessage()
 	{
 	}
 
-	public RequestScreenshotMessage(int imageId)
+	public RequestScreenshotMessage(String serialId)
 	{
-		this.imageId = imageId;
+		this.serialId = serialId;
 	}
 
-	int getImageId()
+	String getserialId()
 	{
-		return imageId;
+		return serialId;
 	}
 
 	@Override
 	public void fromBytes(ByteBuf buf)
 	{
-		imageId = buf.readInt();
+		serialId = ByteBufUtils.readUTF8String(buf);
 	}
 
 	@Override
 	public void toBytes(ByteBuf buf)
 	{
-		buf.writeInt(imageId);
-
+		ByteBufUtils.writeUTF8String(buf, serialId);
 	}
-
 }
