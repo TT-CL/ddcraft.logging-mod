@@ -3,6 +3,7 @@ package com.harunabot.chatannotator.screenshot.network;
 import com.google.common.primitives.Bytes;
 
 import io.netty.buffer.ByteBuf;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import scala.collection.generic.BitOperations.Int;
 
@@ -12,7 +13,7 @@ import scala.collection.generic.BitOperations.Int;
  */
 public class ScreenshotDataMessage implements IMessage
 {
-	private int imageId;
+	private String serialId;
 	private int partId;
 	private byte[] bytes;
 
@@ -20,16 +21,16 @@ public class ScreenshotDataMessage implements IMessage
 	{
 	}
 
-	public ScreenshotDataMessage(int imageId, int partId, byte[] bytes)
+	public ScreenshotDataMessage(String serialId, int partId, byte[] bytes)
 	{
-		this.imageId = imageId;
+		this.serialId = serialId;
 		this.partId = partId;
 		this.bytes = bytes;
 	}
 
-	int getImageId()
+	String getSerialId()
 	{
-		return imageId;
+		return serialId;
 	}
 
 	int getPartId()
@@ -45,7 +46,7 @@ public class ScreenshotDataMessage implements IMessage
 	@Override
 	public void fromBytes(ByteBuf buf)
 	{
-		imageId = buf.readInt();
+		serialId = ByteBufUtils.readUTF8String(buf);
 		partId = buf.readInt();
 		bytes = new byte[buf.readableBytes()];
 		buf.readBytes(bytes);
@@ -54,7 +55,7 @@ public class ScreenshotDataMessage implements IMessage
 	@Override
 	public void toBytes(ByteBuf buf)
 	{
-		buf.writeInt(imageId);
+		ByteBufUtils.writeUTF8String(buf, serialId);
 		buf.writeInt(partId);
 		buf.writeBytes(bytes);
 	}

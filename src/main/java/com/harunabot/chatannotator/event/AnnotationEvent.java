@@ -1,8 +1,8 @@
 package com.harunabot.chatannotator.event;
 
-import com.harunabot.chatannotator.client.gui.DialogueAct;
+import com.harunabot.chatannotator.annotator.DialogueAct;
 import com.harunabot.chatannotator.common.ChatAnnotatorHooks;
-import com.harunabot.chatannotator.util.handlers.ChatEventHandler;
+import com.harunabot.chatannotator.util.handlers.event.ChatEventHandler;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
 
 import net.minecraft.entity.player.EntityPlayerMP;

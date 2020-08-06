@@ -1,16 +1,14 @@
-package com.harunabot.chatannotator.annotator.network;
+package com.harunabot.chatannotator.logger.network;
 
 import java.nio.charset.Charset;
-
-import com.typesafe.config.ConfigException.BugOrBroken;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 
 /*
@@ -18,6 +16,8 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
  */
 public class PlayerStateMessage implements IMessage
 {
+	private String serialId;
+
 	private BlockPos playerPos;
 	// vector of where player is looking
 	private Vec3d playerLook;
@@ -32,14 +32,21 @@ public class PlayerStateMessage implements IMessage
 	{
 	}
 
-	public PlayerStateMessage(EntityPlayer player, World world, float partialTicks)
+	public PlayerStateMessage(String serialId, EntityPlayer player, World world, float partialTicks)
 	{
+		this.serialId = serialId;
+
 		playerPos = player.getPosition();
 		playerLook = player.getLook(partialTicks);
 
 		lookingAtPos = player.rayTrace(100, partialTicks).getBlockPos();
 		IBlockState lookingBlockState = world.getBlockState(lookingAtPos);
 		lookingAtName = lookingBlockState.getBlock().getRegistryName().toString();
+	}
+
+	public String getSerialId()
+	{
+		return serialId;
 	}
 
 	public BlockPos getPlayerPos()
@@ -67,16 +74,18 @@ public class PlayerStateMessage implements IMessage
 	@Override
 	public void fromBytes(ByteBuf buf)
 	{
+		serialId = ByteBufUtils.readUTF8String(buf);
 		playerPos = bytesToPos(buf);
 		playerLook = bytesToVec3d(buf);
 		lookingAtPos = bytesToPos(buf);
-		int strlen = buf.readInt();
-		lookingAtName = buf.readCharSequence(strlen, Charset.defaultCharset()).toString();
+		lookingAtName = ByteBufUtils.readUTF8String(buf);
 	}
 
 	@Override
 	public void toBytes(ByteBuf buf)
 	{
+		ByteBufUtils.writeUTF8String(buf, serialId);
+
 		buf.writeInt(playerPos.getX());
 		buf.writeInt(playerPos.getY());
 		buf.writeInt(playerPos.getZ());
@@ -89,8 +98,7 @@ public class PlayerStateMessage implements IMessage
 		buf.writeInt(lookingAtPos.getY());
 		buf.writeInt(lookingAtPos.getZ());
 
-		buf.writeInt(lookingAtName.length());
-		buf.writeCharSequence(lookingAtName, Charset.defaultCharset());
+		ByteBufUtils.writeUTF8String(buf, lookingAtName);
 	}
 
 	private static BlockPos bytesToPos(ByteBuf buf)

@@ -1,10 +1,11 @@
-package com.harunabot.chatannotator.util.handlers;
+package com.harunabot.chatannotator.util.handlers.event;
 
 import org.apache.logging.log4j.Level;
 
 import com.harunabot.chatannotator.ChatAnnotator;
-import com.harunabot.chatannotator.client.gui.GuiChatWithAnnotation;
-import com.harunabot.chatannotator.client.gui.MyGuiNewChat;
+import com.harunabot.chatannotator.annotator.client.gui.AlterGuiNewChat;
+import com.harunabot.chatannotator.annotator.client.gui.GuiChatWithAnnotation;
+import com.harunabot.chatannotator.common.config.AnnotationConfig;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiChat;
@@ -28,7 +29,8 @@ public class ClientEventHandler
 	@SubscribeEvent
 	public static void onGuiOpen(GuiOpenEvent event)
 	{
-		if(event.getGui() == null) return;
+		if (!AnnotationConfig.enableAnnotationLabel) return;
+		if (event.getGui() == null) return;
 
 		// replace Chat GUI
 		if (event.getGui() instanceof GuiChat) {
@@ -46,18 +48,18 @@ public class ClientEventHandler
 	/***
 	 * Replace GUINewChat
 	 */
-	public static void replaceGuiNewChat()
+	protected static void replaceGuiNewChat()
 	{
 		GuiIngame ingameGUI = Minecraft.getMinecraft().ingameGUI;
 		GuiNewChat originalGuiNewChat = ingameGUI.getChatGUI();
 
 		// Already replaced
-		if(originalGuiNewChat instanceof MyGuiNewChat) return;
+		if(originalGuiNewChat instanceof AlterGuiNewChat) return;
 
 		try
 		{
 			// Set new GuiNewChat
-			MyGuiNewChat newGuiNewChat = new MyGuiNewChat(Minecraft.getMinecraft());
+			AlterGuiNewChat newGuiNewChat = new AlterGuiNewChat(Minecraft.getMinecraft());
 			ObfuscationReflectionHelper.setPrivateValue(GuiIngame.class, ingameGUI, newGuiNewChat, PERSISTANTCHATGUI_FIELD_INDEX);
 		}
 		catch(UnableToFindFieldException | UnableToAccessFieldException e)

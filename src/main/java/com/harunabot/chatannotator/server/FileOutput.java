@@ -8,7 +8,6 @@ import java.io.PrintWriter;
 
 import org.apache.logging.log4j.Level;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.harunabot.chatannotator.ChatAnnotator;
 
@@ -16,21 +15,21 @@ public class FileOutput
 {
 	public static boolean outputJson(File jsonFile, Object jsonValue)
 	{
+		boolean isNew = !jsonFile.exists();
 		ObjectMapper mapper = new ObjectMapper();
 
 		try {
 			 mapper.writerWithDefaultPrettyPrinter().writeValue(jsonFile, jsonValue);
-		} catch (JsonProcessingException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-			ChatAnnotator.LOGGER.log(Level.ERROR, "Failed to process json");
-			return false;
-		} catch (IOException e) {
-	    	e.printStackTrace();
 	    	ChatAnnotator.LOGGER.log(Level.ERROR, "Failed to output json");
 			return false;
 		}
 
-		ChatAnnotator.LOGGER.log(Level.INFO, "Created file: " + jsonFile.toString());
+		if (isNew)
+		{
+			ChatAnnotator.LOGGER.log(Level.INFO, "Created file: " + jsonFile.toString());
+		}
 		return true;
 	}
 

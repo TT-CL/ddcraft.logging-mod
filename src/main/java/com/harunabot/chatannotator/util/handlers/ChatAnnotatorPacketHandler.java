@@ -5,14 +5,21 @@ import java.util.Objects;
 import com.harunabot.chatannotator.screenshot.network.HandlerRequestScreenshotMessage;
 import com.harunabot.chatannotator.screenshot.network.HandlerScreenshotDataMessage;
 import com.harunabot.chatannotator.screenshot.network.NotifyArrivalMessage;
-import com.harunabot.chatannotator.annotator.network.HandlerPlayerStateMessage;
-import com.harunabot.chatannotator.annotator.network.PlayerStateMessage;
+import com.harunabot.chatannotator.annotator.network.ChatAnnotationMessage;
+import com.harunabot.chatannotator.annotator.network.HandlerChatAnnotationMessage;
+import com.harunabot.chatannotator.logger.network.HandlerPlayerStateMessage;
+import com.harunabot.chatannotator.logger.network.PlayerStateMessage;
+import com.harunabot.chatannotator.network.ChatIdMessage;
+import com.harunabot.chatannotator.network.ConfigMessage;
+import com.harunabot.chatannotator.network.HandlerChatIdMessage;
+import com.harunabot.chatannotator.network.HandlerConfigMessage;
 import com.harunabot.chatannotator.screenshot.network.HandlerNotifyArrivalMessage;
 import com.harunabot.chatannotator.screenshot.network.RequestScreenshotMessage;
 import com.harunabot.chatannotator.screenshot.network.ScreenshotDataMessage;
 import com.harunabot.chatannotator.screenshot.network.ScreenshotDataMessage;
 import com.harunabot.chatannotator.util.Reference;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -42,6 +49,13 @@ public class ChatAnnotatorPacketHandler
 
 		// Chat annotation packets
 		INSTANCE.registerMessage(HandlerPlayerStateMessage.class, PlayerStateMessage.class, discriminator++, Side.SERVER);
+		INSTANCE.registerMessage(HandlerChatAnnotationMessage.class, ChatAnnotationMessage.class, discriminator++, Side.SERVER);
+
+		// Config packets
+		INSTANCE.registerMessage(HandlerConfigMessage.class, ConfigMessage.class, discriminator++, Side.CLIENT);
+
+		// Chat common packet
+		INSTANCE.registerMessage(HandlerChatIdMessage.class, ChatIdMessage.class, discriminator++, Side.SERVER);
 	}
 
 	public static void sendToServer(IMessage message)
@@ -53,5 +67,16 @@ public class ChatAnnotatorPacketHandler
 		}
 
 		INSTANCE.sendToServer(message);
+	}
+
+	public static void sendToClient(IMessage message, EntityPlayerMP player)
+	{
+		if (Objects.isNull(INSTANCE))
+		{
+			System.err.println("Invalid access to network: mod not initialized");
+			return;
+		}
+
+		INSTANCE.sendTo(message, player);
 	}
 }

@@ -12,6 +12,7 @@ import com.harunabot.chatannotator.ChatAnnotator;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import scala.collection.generic.BitOperations.Int;
 
@@ -20,7 +21,7 @@ import scala.collection.generic.BitOperations.Int;
  */
 public class NotifyArrivalMessage implements IMessage
 {
-	private int imageId;
+	private String serialId;
 	private int parts;
 	private int length;
 
@@ -28,16 +29,16 @@ public class NotifyArrivalMessage implements IMessage
 	{
 	}
 
-	public NotifyArrivalMessage(int imageId, int parts, int length)
+	public NotifyArrivalMessage(String serialId, int parts, int length)
 	{
-		this.imageId = imageId;
+		this.serialId = serialId;
 		this.parts = parts;
 		this.length = length;
 	}
 
-	public int getImageId()
+	public String getSerialId()
 	{
-		return imageId;
+		return serialId;
 	}
 
 	public int getPartsNum()
@@ -53,7 +54,7 @@ public class NotifyArrivalMessage implements IMessage
 	@Override
 	public void fromBytes(ByteBuf buf)
 	{
-		imageId = buf.readInt();
+		serialId = ByteBufUtils.readUTF8String(buf);
 		parts = buf.readInt();
 		length = buf.readInt();
 	}
@@ -61,7 +62,7 @@ public class NotifyArrivalMessage implements IMessage
 	@Override
 	public void toBytes(ByteBuf buf)
 	{
-		buf.writeInt(imageId);
+		ByteBufUtils.writeUTF8String(buf, serialId);
 		buf.writeInt(parts);
 		buf.writeInt(length);
 	}

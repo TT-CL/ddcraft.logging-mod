@@ -25,14 +25,16 @@ public class ScreenRecorder
 
 	// Flag to reserve screenshot
 	protected static boolean shootFlag;
+	protected static String reservedSerialId;
 
 	/**
 	 * Set the flag true to create the screenshot on an appropriate event
 	 */
 	@SideOnly(Side.CLIENT)
-	public static void reserveScreenshot()
+	public static void reserveScreenshot(String serialId)
 	{
 		shootFlag = true;
+		reservedSerialId = serialId;
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -49,7 +51,7 @@ public class ScreenRecorder
 		Minecraft minecraft = Minecraft.getMinecraft();
 
 		bufferedImage = ScreenShotHelper.createScreenshot(minecraft.displayWidth, minecraft.displayHeight, minecraft.getFramebuffer());
-		message = SCREENSHOT_HOLDER.registerImage(bufferedImage);
+		message = SCREENSHOT_HOLDER.registerImage(reservedSerialId, bufferedImage);
 
 		ChatAnnotatorPacketHandler.sendToServer(message);
 

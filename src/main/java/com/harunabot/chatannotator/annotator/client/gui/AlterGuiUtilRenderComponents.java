@@ -1,4 +1,4 @@
-package com.harunabot.chatannotator.client.gui;
+package com.harunabot.chatannotator.annotator.client.gui;
 
 
 import java.util.List;
@@ -19,7 +19,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  * GuiUtilRenderComponents extended for TextComponentAnnotation
  */
 @SideOnly(Side.CLIENT)
-class MyGuiUtilRenderComponents extends GuiUtilRenderComponents
+class AlterGuiUtilRenderComponents extends GuiUtilRenderComponents
 {
     public static List<ITextComponent> splitText(ITextComponent textComponent, int maxTextLenght, FontRenderer fontRendererIn, boolean p_178908_3_, boolean forceTextColor)
     {

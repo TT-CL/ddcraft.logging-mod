@@ -4,8 +4,10 @@ package com.harunabot.chatannotator.proxy;
 import org.apache.logging.log4j.Level;
 
 import com.harunabot.chatannotator.ChatAnnotator;
-import com.harunabot.chatannotator.annotator.server.ChatRecorder;
+import com.harunabot.chatannotator.annotator.server.AnnotationRecorder;
+import com.harunabot.chatannotator.logger.server.ChatRecorder;
 import com.harunabot.chatannotator.screenshot.ScreenRecorder;
+import com.harunabot.chatannotator.server.ChatIdManagerServer;
 
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -30,7 +32,6 @@ public class ServerProxy extends CommonProxy
 
 		try
 		{
-
 			ChatAnnotator.modDirectory.mkdir();
 		}
 		catch (SecurityException e)
@@ -39,6 +40,8 @@ public class ServerProxy extends CommonProxy
 		}
 
 		ChatAnnotator.CHAT_RECORDER = new ChatRecorder();
+		ChatAnnotator.ANNOTATION_RECORDER = new AnnotationRecorder();
+		ChatAnnotator.CHAT_ID_MANAGER_SERVER = new ChatIdManagerServer();
     }
 
 	@Override
