@@ -5,6 +5,8 @@ import java.util.Objects;
 import com.harunabot.chatannotator.screenshot.network.HandlerRequestScreenshotMessage;
 import com.harunabot.chatannotator.screenshot.network.HandlerScreenshotDataMessage;
 import com.harunabot.chatannotator.screenshot.network.NotifyArrivalMessage;
+import com.harunabot.chatannotator.annotator.network.ChatAnnotationMessage;
+import com.harunabot.chatannotator.annotator.network.HandlerChatAnnotationMessage;
 import com.harunabot.chatannotator.logger.network.HandlerPlayerStateMessage;
 import com.harunabot.chatannotator.logger.network.PlayerStateMessage;
 import com.harunabot.chatannotator.network.ChatIdMessage;
@@ -47,6 +49,7 @@ public class ChatAnnotatorPacketHandler
 
 		// Chat annotation packets
 		INSTANCE.registerMessage(HandlerPlayerStateMessage.class, PlayerStateMessage.class, discriminator++, Side.SERVER);
+		INSTANCE.registerMessage(HandlerChatAnnotationMessage.class, ChatAnnotationMessage.class, discriminator++, Side.SERVER);
 
 		// Config packets
 		INSTANCE.registerMessage(HandlerConfigMessage.class, ConfigMessage.class, discriminator++, Side.CLIENT);

@@ -1,4 +1,4 @@
-package com.harunabot.chatannotator.server;
+package com.harunabot.chatannotator.annotator.server;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 
@@ -19,6 +20,8 @@ import org.apache.logging.log4j.Level;
 import com.harunabot.chatannotator.ChatAnnotator;
 import com.harunabot.chatannotator.annotator.DialogueAct;
 import com.harunabot.chatannotator.common.ChatAnnotatorHooks;
+import com.harunabot.chatannotator.server.ChatData;
+import com.harunabot.chatannotator.server.FileOutput;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
 
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -36,10 +39,8 @@ public class AnnotationLog
 
 	/** All Chats */
 	private List<TextComponentAnnotation> components;
-	/** Annotated chats */
-	private Map<String, TextComponentAnnotation> annotatedComponents;
 	/** Unannotated chats */
-	private List<TextComponentAnnotation> unAnnotatedComponents;
+	private Map<String, Map<Integer, Integer>> unAnnotatedIndices;
 
 
 	public AnnotationLog(int dimension)
@@ -50,16 +51,26 @@ public class AnnotationLog
 		FileOutput.createFile(logFile);
 
 		this.components = new ArrayList<>();
-		this.annotatedComponents = new HashMap<>();
-		this.unAnnotatedComponents = new ArrayList<>();
+		this.unAnnotatedIndices = new HashMap<>();
 	}
 
 
 	public void addNewChat(TextComponentAnnotation component)
 	{
+		// add chat component
+		int componentIndex = components.size();
 		components.add(component);
-		unAnnotatedComponents.add(component);
 
+		// mark component as unannotated
+		String sender = component.getSender();
+		int chatId = component.getNumeralId();
+		if (!unAnnotatedIndices.containsKey(sender))
+		{
+			unAnnotatedIndices.put(sender, new HashMap<>());
+		}
+		unAnnotatedIndices.get(sender).put(chatId, componentIndex);
+
+		// log
 		String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
 		String output = time + " :[CHAT] " + component.toLogString();
 		FileOutput.appendFile(logFile, output);
@@ -76,7 +87,8 @@ public class AnnotationLog
 					component.getReceiverAnnotation(),
 					component.getSender(),
 					component.getTime(),
-					component.getText());
+					component.getText(),
+					component.getNumeralId());
 			if(!outputMap.containsKey(key))
 			{
 				outputMap.put(key, new ArrayList<>());
@@ -89,33 +101,39 @@ public class AnnotationLog
 		FileOutput.outputJson(jsonFile, outputMap);
 	}
 
-
-	@Nullable
-	public void annotateChat(DialogueAct annotation, String identicalString, EntityPlayerMP player)
+	public void annotateChat(DialogueAct annotation, int chatId, String senderId, EntityPlayerMP annotator)
 	{
-		for(TextComponentAnnotation component: this.unAnnotatedComponents)
+		// get component from unannotatedChats
+		Map<Integer, Integer> unannotated = unAnnotatedIndices.get(senderId);
+		if (Objects.isNull(unannotated) || !unannotated.containsKey(chatId))
 		{
-			if(component.toIdenticalString().equals(identicalString))
-			{
-				// AnnotationEvent
-				TextComponentAnnotation annotatedComponent = component.createCopy(); // create copy to protect original component
-				annotatedComponent.annotateByReceiver(annotation);
-				annotatedComponent = ChatAnnotatorHooks.onAnnotationEvent(annotatedComponent, player);
-				if(annotatedComponent == null)
-				{
-					return;
-				}
-
-				component.annotateByReceiver(annotatedComponent.getReceiverAnnotation());
-				this.unAnnotatedComponents.remove(component);
-				this.annotatedComponents.put(component.getTime(), component);
-
-				String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
-				String output = time + " :[ANNOTATION] " + annotation.toString() +  "=>" + annotatedComponent.toLogString();
-				FileOutput.appendFile(logFile, output);
-
-				break;
-			}
+			ChatAnnotator.LOGGER.log(Level.ERROR, "Failed to annotate chat! id: " + chatId + ", sender: " + senderId);
+			return;
 		}
+
+		int componentIndex = unannotated.get(chatId);
+		TextComponentAnnotation component = components.get(componentIndex);
+		if (Objects.isNull(component))
+		{
+			ChatAnnotator.LOGGER.log(Level.ERROR, "Failed to annotate chat! id: " + chatId + ", sender: " + senderId);
+			return;
+		}
+
+		// AnnotationEvent
+		TextComponentAnnotation annotatedComponent = component.createCopy(); // create copy to protect original component
+		annotatedComponent.annotateByReceiver(annotation);
+		annotatedComponent = ChatAnnotatorHooks.onAnnotationEvent(annotatedComponent, annotator);
+		if(annotatedComponent == null)
+		{
+			return;
+		}
+
+		component.annotateByReceiver(annotatedComponent.getReceiverAnnotation());
+		unannotated.remove(chatId);
+
+		// log
+		String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
+		String output = time + " :[ANNOTATION] " + annotation.toString() +  "=>" + annotatedComponent.toLogString();
+		FileOutput.appendFile(logFile, output);
 	}
 }

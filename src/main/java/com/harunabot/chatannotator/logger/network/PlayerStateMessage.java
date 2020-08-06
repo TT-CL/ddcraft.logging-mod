@@ -78,7 +78,7 @@ public class PlayerStateMessage implements IMessage
 		playerPos = bytesToPos(buf);
 		playerLook = bytesToVec3d(buf);
 		lookingAtPos = bytesToPos(buf);
-		lookingAtName = serialId = ByteBufUtils.readUTF8String(buf);
+		lookingAtName = ByteBufUtils.readUTF8String(buf);
 	}
 
 	@Override

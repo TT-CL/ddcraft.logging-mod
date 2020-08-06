@@ -10,6 +10,8 @@ import org.apache.logging.log4j.Level;
 import com.google.common.collect.Lists;
 import com.harunabot.chatannotator.ChatAnnotator;
 import com.harunabot.chatannotator.annotator.DialogueAct;
+import com.harunabot.chatannotator.annotator.network.ChatAnnotationMessage;
+import com.harunabot.chatannotator.util.handlers.ChatAnnotatorPacketHandler;
 import com.harunabot.chatannotator.util.text.StringTools;
 import com.harunabot.chatannotator.util.text.TextComponentAnnotation;
 
@@ -17,6 +19,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.util.text.ITextComponent;
+import scala.annotation.implicitNotFound;
 
 /**
  * Additional Gui for GuiChatAnnotation
@@ -195,23 +198,21 @@ public class GuiAnnotationPopUp extends Gui
 
 	protected void annotateComponent(DialogueAct dialogueAct)
 	{
-        if(this.mc.ingameGUI.getChatGUI() instanceof AlterGuiNewChat)
-        {
-        	AlterGuiNewChat guiNewChat = (AlterGuiNewChat)this.mc.ingameGUI.getChatGUI();
-        	ITextComponent component = guiNewChat.annotateChatComponent(this.chatLineNumber, dialogueAct);
+        if(! (this.mc.ingameGUI.getChatGUI() instanceof AlterGuiNewChat)) return;
 
-        	if(component != null && component instanceof TextComponentAnnotation)
-        	{
-        		TextComponentAnnotation componentAnnotation = (TextComponentAnnotation)component;
-        		int dimension = componentAnnotation.getDimension();
-        		String msg = String.format("[%s](%d)%s", dialogueAct.getName(), dimension, componentAnnotation.toIdenticalString());
-	        	msg = StringTools.deleteIllegalCharacters(msg);
-	        	// TODO: 別の形で送る AnnotationHandlerみたいなの
-	        	parent.sendChatMessage(msg, false);
+    	AlterGuiNewChat guiNewChat = (AlterGuiNewChat)this.mc.ingameGUI.getChatGUI();
+    	ITextComponent component = guiNewChat.annotateChatComponent(this.chatLineNumber, dialogueAct);
 
-	        	ChatAnnotator.LOGGER.log(Level.INFO, "Annotated chat: [annotation]" + dialogueAct.getName() + ", [chat]" + componentAnnotation.getText());
-        	}
-        }
+    	if(component != null && component instanceof TextComponentAnnotation)
+    	{
+    		TextComponentAnnotation componentAnnotation = (TextComponentAnnotation)component;
+    		String senderId = componentAnnotation.getSender();
+    		int numeralId = componentAnnotation.getNumeralId();
+
+    		ChatAnnotatorPacketHandler.sendToServer(new ChatAnnotationMessage(senderId, numeralId, dialogueAct));
+
+        	ChatAnnotator.LOGGER.log(Level.INFO, "Annotated chat: [annotation]" + dialogueAct.getName() + ", [chat]" + componentAnnotation.getText());
+    	}
 	}
 
 }

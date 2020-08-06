@@ -222,25 +222,11 @@ public class ChatEventHandler
 		TextComponentAnnotation annotatedChat = new TextComponentAnnotation(msg, annotation, senderId, dimension, numeralId);
 
 		// Take log
-		addNewChat(annotatedChat, dimension);
+		ChatAnnotator.ANNOTATION_RECORDER.addNewChat(annotatedChat, dimension);
 
 		return annotatedChat.toComponentString();
 	}
 
-	/**
-	 * Take log
-	 */
-	protected static void addNewChat(TextComponentAnnotation component, int dimension)
-	{
-		try
-		{
-			ChatAnnotator.annotationLogs.get(dimension).addNewChat((TextComponentAnnotation) component);
-		}
-		catch(NullPointerException e)
-		{
-			ChatAnnotator.LOGGER.log(Level.ERROR, "Can't find log file");
-		}
-	}
 
 	/*==========================================================*/
 

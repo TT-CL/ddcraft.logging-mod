@@ -4,6 +4,7 @@ package com.harunabot.chatannotator.proxy;
 import org.apache.logging.log4j.Level;
 
 import com.harunabot.chatannotator.ChatAnnotator;
+import com.harunabot.chatannotator.annotator.server.AnnotationRecorder;
 import com.harunabot.chatannotator.logger.server.ChatRecorder;
 import com.harunabot.chatannotator.screenshot.ScreenRecorder;
 import com.harunabot.chatannotator.server.ChatIdManagerServer;
@@ -39,6 +40,7 @@ public class ServerProxy extends CommonProxy
 		}
 
 		ChatAnnotator.CHAT_RECORDER = new ChatRecorder();
+		ChatAnnotator.ANNOTATION_RECORDER = new AnnotationRecorder();
 		ChatAnnotator.CHAT_ID_MANAGER_SERVER = new ChatIdManagerServer();
     }
 
