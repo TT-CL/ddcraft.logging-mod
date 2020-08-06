@@ -7,7 +7,9 @@ import com.harunabot.chatannotator.screenshot.network.HandlerScreenshotDataMessa
 import com.harunabot.chatannotator.screenshot.network.NotifyArrivalMessage;
 import com.harunabot.chatannotator.logger.network.HandlerPlayerStateMessage;
 import com.harunabot.chatannotator.logger.network.PlayerStateMessage;
+import com.harunabot.chatannotator.network.ChatIdMessage;
 import com.harunabot.chatannotator.network.ConfigMessage;
+import com.harunabot.chatannotator.network.HandlerChatIdMessage;
 import com.harunabot.chatannotator.network.HandlerConfigMessage;
 import com.harunabot.chatannotator.screenshot.network.HandlerNotifyArrivalMessage;
 import com.harunabot.chatannotator.screenshot.network.RequestScreenshotMessage;
@@ -48,6 +50,9 @@ public class ChatAnnotatorPacketHandler
 
 		// Config packets
 		INSTANCE.registerMessage(HandlerConfigMessage.class, ConfigMessage.class, discriminator++, Side.CLIENT);
+
+		// Chat common packet
+		INSTANCE.registerMessage(HandlerChatIdMessage.class, ChatIdMessage.class, discriminator++, Side.SERVER);
 	}
 
 	public static void sendToServer(IMessage message)

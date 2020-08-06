@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Level;
 import com.harunabot.chatannotator.ChatAnnotator;
 import com.harunabot.chatannotator.annotator.DialogueAct;
 import com.harunabot.chatannotator.logger.network.PlayerStateMessage;
+import com.harunabot.chatannotator.network.ChatIdMessage;
 import com.harunabot.chatannotator.screenshot.ScreenRecorder;
 import com.harunabot.chatannotator.util.handlers.ChatAnnotatorPacketHandler;
 import com.harunabot.chatannotator.util.text.StringTools;
@@ -35,10 +36,12 @@ public class ChatEventHandler
 {
 	private static final String CHAT_KEY = "chat.type.text";
 
+	/** =================
+	 *    SERVER SIDE
+	 * ================== */
+
 	/**
-	 * Change chat message to TextComponentAnnotation
-	 * or apply annotation
-	 * and take log
+	 * Change chat message to TextComponentAnnotation and take log
 	 */
 	@SubscribeEvent
 	public static void onServerChat(ServerChatEvent event)
@@ -47,24 +50,17 @@ public class ChatEventHandler
 		ChatEventHandler.ComponentElements elements = validateServerChat(component);
 		if(elements == null) return;
 
-		// Sender's UUID
-		UUID senderId = event.getPlayer().getUniqueID();
-		// Sender's dimension
-		int dimension = event.getPlayer().getServerWorld().provider.getDimension();
+		// Sender's info
+		EntityPlayerMP player = event.getPlayer();
+		UUID senderId = player.getUniqueID();
+		int dimension = player.dimension;
 
-		if(isAnnotation(elements.msgComponent))
-		{
-			// Annotate
-			onAnnotatedChat(elements.msgComponent.getText(), event.getPlayer());
-			event.setCanceled(true);
-			return;
-		}
-		else
-		{
-			// Replace Chat
-			ITextComponent newComponent = createAnnotatedServerChat((TextComponentTranslation) component, elements, senderId, dimension);
-			event.setComponent(newComponent);
-		}
+		String msg = elements.msgComponent.getText();
+		int numeralId = ChatAnnotator.CHAT_ID_MANAGER_SERVER.getIdOnServerChat(msg, player);
+
+		// Replace Chat
+		ITextComponent newComponent = createAnnotatedServerChat((TextComponentTranslation) component, elements, senderId, dimension, numeralId);
+		event.setComponent(newComponent);
 	}
 
 	/**
@@ -86,6 +82,37 @@ public class ChatEventHandler
 		}
 
 		return new ChatEventHandler.ComponentElements(args, msgComponent);
+	}
+
+	/** =================
+	 *    CLIENT SIDE
+	 * ================== */
+
+	/**
+	 * Send annotation packets together with chat
+	 * @param event
+	 */
+	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
+	public static void onClientChat(ClientChatEvent event)
+	{
+		String msg = event.getMessage();
+		if (msg.startsWith("/"))
+		{
+			// ignore command
+			return;
+		}
+
+		String chatId = ChatAnnotator.CHAT_ID_MANAGER_CLIENT.getId(msg);
+
+		Minecraft mc = Minecraft.getMinecraft();
+		ChatAnnotatorPacketHandler.sendToServer(new ChatIdMessage(chatId, msg));
+		ChatAnnotatorPacketHandler.sendToServer(new PlayerStateMessage(chatId, mc.player, mc.world, mc.getRenderPartialTicks()));
+
+    	// send screenshot together
+    	ScreenRecorder.reserveScreenshot();
+
+		ChatAnnotator.CHAT_ID_MANAGER_CLIENT.onSendChatMessage(msg);
 	}
 
 	/**
@@ -128,11 +155,9 @@ public class ChatEventHandler
 		event.setMessage(new TextComponentTranslation(component.getKey(), args));
 	}
 
-
-	private static boolean isAnnotation(TextComponentString component)
-	{
-		return component.getText().startsWith("[");
-	}
+	/** =================
+	 *    UTILS
+	 * ================== */
 
 	private static boolean isChatTranslationComponent(ITextComponent comp)
 	{
@@ -146,9 +171,9 @@ public class ChatEventHandler
 	/**
 	 * Create new componentTranslation with annotated message
 	 */
-	private static ITextComponent createAnnotatedServerChat(TextComponentTranslation component, ComponentElements elements, UUID senderId, int dimension)
+	private static ITextComponent createAnnotatedServerChat(TextComponentTranslation component, ComponentElements elements, UUID senderId, int dimension, int numeralId)
 	{
-		ITextComponent newMsgComponent = createAnnotatedChat(elements.msgComponent, senderId, dimension);
+		ITextComponent newMsgComponent = createAnnotatedChat(elements.msgComponent, senderId, dimension, numeralId);
 		if(newMsgComponent == null) {
 			// Something wrong with the message
 			ChatAnnotator.LOGGER.log(Level.ERROR, "Invalid chat textcomponent: " + elements.msgComponent.getText());
@@ -177,7 +202,7 @@ public class ChatEventHandler
 	/**
 	 * Create new AnnotatedComponent from TextComponentString
 	 */
-	private static TextComponentString createAnnotatedChat(TextComponentString msgComponent, UUID senderId, int dimension)
+	private static TextComponentString createAnnotatedChat(TextComponentString msgComponent, UUID senderId, int dimension, int numeralId)
 	{
 		// Separate the message into the annotation part & main part
 		String rawMsg = msgComponent.getText();
@@ -194,30 +219,12 @@ public class ChatEventHandler
 			return null;
 		}
 
-		TextComponentAnnotation annotatedChat = new TextComponentAnnotation(msg, annotation, senderId, dimension);
+		TextComponentAnnotation annotatedChat = new TextComponentAnnotation(msg, annotation, senderId, dimension, numeralId);
 
 		// Take log
 		addNewChat(annotatedChat, dimension);
 
 		return annotatedChat.toComponentString();
-	}
-
-	public static void onAnnotatedChat(String rawMsg, EntityPlayerMP player)
-	{
-		Pair<String, String> separatedMsg = StringTools.separatePrefixBySymbols(rawMsg, '[', ']');
-		Pair<String, String> separatedRight = StringTools.separatePrefixBySymbols(separatedMsg.getRight(), '(', ')');
-		String annotationStr = separatedMsg.getLeft();
-		int dimension = Integer.valueOf(separatedRight.getLeft());
-		String identicalString = separatedRight.getRight();
-
-		DialogueAct annotation = DialogueAct.convertFromName(annotationStr);
-		if (annotation == null)
-		{
-			ChatAnnotator.LOGGER.log(Level.ERROR, "Something wrong with the annotation msg: " + rawMsg);
-			return;
-		}
-
-		ChatAnnotator.annotationLogs.get(dimension).annotateChat(annotation, identicalString, player);
 	}
 
 	/**

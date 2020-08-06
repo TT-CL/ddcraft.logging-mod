@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Level;
 
 import com.google.common.collect.Lists;
 import com.harunabot.chatannotator.ChatAnnotator;
-import com.harunabot.chatannotator.client.gui.DialogueAct;
+import com.harunabot.chatannotator.annotator.DialogueAct;
 import com.harunabot.chatannotator.util.text.event.AnnotationClickEvent;
 
 import net.minecraft.util.text.ITextComponent;
@@ -28,16 +28,17 @@ public class TextComponentAnnotation extends TextComponentString
 	protected String time;
 	protected String fullMsg;
 	protected int dimension;
+	protected int numeralId;
 
-	private final int PARAM_NUM = 6;
+	private final int PARAM_NUM = 7;
 
 	// FIXME: should contain sendername?
-    public TextComponentAnnotation(String msg, DialogueAct senderAnnotation, UUID senderId, int dimension)
+    public TextComponentAnnotation(String msg, DialogueAct senderAnnotation, UUID senderId, int dimension, int numeralId)
     {
-    	this(msg,senderAnnotation, null, senderId.toString(), new SimpleDateFormat("HH:mm:ss").format(new Date()), dimension);
+    	this(msg,senderAnnotation, null, senderId.toString(), new SimpleDateFormat("HH:mm:ss").format(new Date()), dimension, numeralId);
     }
 
-    public TextComponentAnnotation(String msg, DialogueAct senderAnnotation, DialogueAct receiverAnnotation, String senderId, String time, int dimension)
+    public TextComponentAnnotation(String msg, DialogueAct senderAnnotation, DialogueAct receiverAnnotation, String senderId, String time, int dimension, int numeralId)
     {
     	super(msg);
 
@@ -47,6 +48,7 @@ public class TextComponentAnnotation extends TextComponentString
     	this.time = time;
     	this.fullMsg = msg;
     	this.dimension = dimension;
+    	this.numeralId = numeralId;
     }
 
     // Recreate from TextComponentString
@@ -63,6 +65,7 @@ public class TextComponentAnnotation extends TextComponentString
 	    	this.time = siblings.get(3).getUnformattedText();
 	    	this.fullMsg = siblings.get(4).getUnformattedText();
 	    	this.dimension = Integer.parseInt(siblings.get(5).getUnformattedText());
+	    	this.numeralId = Integer.parseInt(siblings.get(6).getUnformattedText());
 	    	this.setStyle(component.getStyle().createDeepCopy());
     	}
     	catch (Exception e)
@@ -75,6 +78,7 @@ public class TextComponentAnnotation extends TextComponentString
     		this.time = "";
     		this.fullMsg = "";
     		this.dimension = 0;
+    		this.numeralId = -1;
 
     		return;
     	}
@@ -98,6 +102,7 @@ public class TextComponentAnnotation extends TextComponentString
     	componentString.appendText(time.toString());
     	componentString.appendText(fullMsg);
     	componentString.appendText(String.valueOf(dimension));
+    	componentString.appendText(String.valueOf(numeralId));
 
     	// Set style to prevent it from changing to String
 		componentString.setStyle(new Style().setColor(TextFormatting.BLACK));
@@ -129,6 +134,11 @@ public class TextComponentAnnotation extends TextComponentString
     {
     	return this.dimension;
     }
+
+    public int getNumeralId()
+	{
+		return numeralId;
+	}
 
     public boolean isAnnotated()
     {
@@ -182,7 +192,7 @@ public class TextComponentAnnotation extends TextComponentString
     		System.out.println("Not partial: '" + msg + "' , '" + this.fullMsg + "'");
     	}
 
-    	TextComponentAnnotation textcomponentannotation = new TextComponentAnnotation(msg, this.senderAnnotation, this.receiverAnnotation, this.senderId.toString(), this.time, this.dimension);
+    	TextComponentAnnotation textcomponentannotation = new TextComponentAnnotation(msg, this.senderAnnotation, this.receiverAnnotation, this.senderId.toString(), this.time, this.dimension, this.numeralId);
 		textcomponentannotation.setStyle(this.getStyle().createShallowCopy());
 
 		for(ITextComponent iTextComponent : this.getSiblings())
@@ -207,12 +217,12 @@ public class TextComponentAnnotation extends TextComponentString
     public String toLogString()
     {
     	return "{\"text\": \"" + this.getText() + "\", \"senderId\": \"" + this.senderId + "\", \"senderAnnotation\": \"" + this.senderAnnotation + "\","
-    			+ " \"receiverAnnotation\": \"" + receiverAnnotation + "\", \"time\": \"" + this.time + "\"}";
+    			+ " \"receiverAnnotation\": \"" + receiverAnnotation + "\", \"time\": \"" + this.time + "\", \"senderChatId\": \"" + this.numeralId + "\"}";
     }
 
     public String toIdenticalString()
     {
-    	return "{text:'" + this.getText() + "', senderId:" + this.senderId + ", time:" + this.time + '}';
+    	return "{text:'" + this.getText() + "', senderId:" + this.senderId + ", time:" + this.time + ", senderChatId:" + this.numeralId + '}';
     }
 
 }
