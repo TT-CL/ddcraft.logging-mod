@@ -11,13 +11,15 @@ public class ChatData
 	public final String senderId;
 	public final String time;
 	public final String fullMsg;
+	public final int senderChatId;
 
-	public ChatData(DialogueAct senderAnnot, DialogueAct receiverAnnot, String senderId, String time, String fullMsg)
+	public ChatData(DialogueAct senderAnnot, DialogueAct receiverAnnot, String senderId, String time, String fullMsg, int senderChatId)
 	{
 		this.senderAnnotation = senderAnnot.toString();
 		this.receiverAnnotation = (Objects.isNull(receiverAnnot)) ? "null" : receiverAnnot.toString();
 		this.senderId = senderId;
 		this.time = time;
 		this.fullMsg = fullMsg;
+		this.senderChatId = senderChatId;
 	}
 }

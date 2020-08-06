@@ -110,7 +110,7 @@ public class ChatEventHandler
 		ChatAnnotatorPacketHandler.sendToServer(new PlayerStateMessage(chatId, mc.player, mc.world, mc.getRenderPartialTicks()));
 
     	// send screenshot together
-    	ScreenRecorder.reserveScreenshot();
+    	ScreenRecorder.reserveScreenshot(chatId);
 
 		ChatAnnotator.CHAT_ID_MANAGER_CLIENT.onSendChatMessage(msg);
 	}

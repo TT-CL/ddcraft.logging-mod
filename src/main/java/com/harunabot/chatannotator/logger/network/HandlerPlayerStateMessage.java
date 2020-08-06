@@ -21,6 +21,7 @@ public class HandlerPlayerStateMessage implements IMessageHandler<PlayerStateMes
 
 		ChatAnnotator.CHAT_RECORDER.recordChatStatus(
 				player,
+				message.getSerialId(),
 				message.getPlayerPos(),
 				message.getPlayerLook(),
 				message.getLookingAtPos(),

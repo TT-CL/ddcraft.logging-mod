@@ -14,7 +14,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 public class ScreenshotLog
 {
 	// TODO: チャット内容とimageIdの紐付け
-	private Map<Integer, Map<UUID, Map<Integer, FragScreenshot>>> dimensionShots = new HashMap<>();
+	private Map<Integer, Map<UUID, Map<String, FragScreenshot>>> dimensionShots = new HashMap<>();
 
 	public void onCreateDimension(int dimension)
 	{
@@ -30,28 +30,28 @@ public class ScreenshotLog
 	}
 
 	// register new FragScreenshot to wait for fragments of the screenshot
-	public int reserveScreenshot(EntityPlayerMP player, int imageId, int parts, int length)
+	public void reserveScreenshot(EntityPlayerMP player, String serialId, int parts, int length)
 	{
 		int dimension = player.dimension;
 		UUID uuid = player.getUniqueID();
-		Map<UUID, Map<Integer, FragScreenshot>> playerShots = dimensionShots.get(dimension);
+		Map<UUID, Map<String, FragScreenshot>> playerShots = dimensionShots.get(dimension);
 		if (!playerShots.containsKey(uuid))
 		{
 			playerShots.put(uuid, new HashMap<>());
 		}
 
-		Map<Integer, FragScreenshot> screenshots = playerShots.get(uuid);
-		screenshots.put(imageId, new FragScreenshot(parts, length));
+		Map<String, FragScreenshot> screenshots = playerShots.get(uuid);
+		screenshots.put(serialId, new FragScreenshot(parts, length));
 
-		return imageId;
+		return;
 	}
 
-	public void saveSubData(EntityPlayerMP player, int imageId, int partId, byte[] subData)
+	public void saveSubData(EntityPlayerMP player, String serialId, int partId, byte[] subData)
 	{
 		int dimension = player.dimension;
 		UUID uuid = player.getUniqueID();
-		Map<Integer, FragScreenshot> screenshots = dimensionShots.get(dimension).get(uuid);
-		FragScreenshot image = screenshots.get(imageId);
+		Map<String, FragScreenshot> screenshots = dimensionShots.get(dimension).get(uuid);
+		FragScreenshot image = screenshots.get(serialId);
 		image.applySubData(partId, subData);
 
 		// Output as an image if all the data arrives, then release
@@ -61,9 +61,10 @@ public class ScreenshotLog
 		File outputDir = new File(dimDir, uuid.toString());
 		if (!outputDir.exists()) outputDir.mkdir();
 
+		int numeralId = ChatAnnotator.CHAT_ID_MANAGER_SERVER.getId(player, serialId);
 		String date = new SimpleDateFormat("yy-MM-dd_HH.mm.ss").format(new Date());
-		String fileName = String.format("%03d_%s.png", imageId, date);
+		String fileName = String.format("%03d_%s.png", numeralId, date);
 		image.saveImage(new File(outputDir, fileName));
-		screenshots.remove(imageId);
+		screenshots.remove(serialId);
 	}
 }
