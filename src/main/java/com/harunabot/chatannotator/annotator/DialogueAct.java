@@ -5,6 +5,8 @@ import java.util.List;
 
 public enum DialogueAct
 {
+	NO_ANNOTATION(-1, "NON", "", 0f, 0f, 0f),
+
 	QUESTION(0, "質問", "question.png", 1.0f, 0.75f, 0.75f),
 	SUGGEST (1, "提案", "suggest.png", 0.75f, 1.0f, 0.75f),
 	CONVEY  (2, "伝達", "convey.png", 0.75f, 0.75f, 1.0f),

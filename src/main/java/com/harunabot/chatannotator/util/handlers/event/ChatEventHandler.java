@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Level;
 
 import com.harunabot.chatannotator.ChatAnnotator;
 import com.harunabot.chatannotator.annotator.DialogueAct;
+import com.harunabot.chatannotator.common.config.AnnotationConfig;
 import com.harunabot.chatannotator.logger.network.PlayerStateMessage;
 import com.harunabot.chatannotator.network.ChatIdMessage;
 import com.harunabot.chatannotator.screenshot.ScreenRecorder;
@@ -207,24 +208,38 @@ public class ChatEventHandler
 		// Separate the message into the annotation part & main part
 		String rawMsg = msgComponent.getText();
 		Pair<String, String> separatedMsg = StringTools.separatePrefixBySymbols(rawMsg, '<', '>');
-		int annotationId = Integer.parseInt(separatedMsg.getLeft());
+		String annotationIdString = separatedMsg.getLeft();
 		String msg = separatedMsg.getRight();
-		DialogueAct annotation;
 
-		// Resolve annotation
-		annotation = DialogueAct.convertFromId(annotationId);
-		if (annotation == null)
+		TextComponentAnnotation component;
+		if (AnnotationConfig.enableAnnotationLabel && !annotationIdString.isEmpty())
 		{
-			ChatAnnotator.LOGGER.log(Level.ERROR, "Something wrong with the chat msg: " + rawMsg);
-			return null;
+			// Create annotatable component
+			int annotationId = Integer.parseInt(annotationIdString);
+			DialogueAct annotation;
+
+			// Resolve annotation
+			annotation = DialogueAct.convertFromId(annotationId);
+			if (annotation == null)
+			{
+				ChatAnnotator.LOGGER.log(Level.ERROR, "Something wrong with the chat msg: " + rawMsg);
+				return null;
+			}
+
+			component = new TextComponentAnnotation(msg, annotation, senderId, dimension, numeralId);
+		}
+		else
+		{
+			// Create non-annotatable component
+			component = new TextComponentAnnotation(msg, DialogueAct.NO_ANNOTATION, senderId, dimension, numeralId);
+			component.annotateByReceiver(DialogueAct.NO_ANNOTATION);
+			System.out.println(component.toLogString());
 		}
 
-		TextComponentAnnotation annotatedChat = new TextComponentAnnotation(msg, annotation, senderId, dimension, numeralId);
-
 		// Take log
-		ChatAnnotator.ANNOTATION_RECORDER.addNewChat(annotatedChat, dimension);
+		ChatAnnotator.ANNOTATION_RECORDER.addNewChat(component, dimension);
 
-		return annotatedChat.toComponentString();
+		return component.toComponentString();
 	}
 
 

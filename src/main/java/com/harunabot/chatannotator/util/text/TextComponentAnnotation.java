@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Level;
 import com.google.common.collect.Lists;
 import com.harunabot.chatannotator.ChatAnnotator;
 import com.harunabot.chatannotator.annotator.DialogueAct;
+import com.harunabot.chatannotator.common.config.AnnotationConfig;
 import com.harunabot.chatannotator.util.text.event.AnnotationClickEvent;
 
 import net.minecraft.util.text.ITextComponent;
@@ -148,7 +149,7 @@ public class TextComponentAnnotation extends TextComponentString
     public void toProperStyle(UUID receiverId)
     {
     	// Sender -> default
-    	if(receiverId.toString().equals(senderId)) {
+    	if(receiverId.toString().equals(senderId) || !AnnotationConfig.enableAnnotationLabel) {
     		this.toDefaultStyle();
     		return;
     	}
