@@ -1,0 +1,5 @@
+# ChatAnnotatorMod
+
+```bash
+./gradlew reobfShadowJar
+```

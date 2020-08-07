@@ -77,12 +77,9 @@ dependencies {
 shadowJar {
     configurations = [project.configurations.shadow]
 
-//    relocate "com.fasterxml.jackson.databind", "com.harunabot.chatannotator.shadow.com.fasterxml.jackson.databind"
+    relocate "com.fasterxml.jackson.databind", "com.harunabot.chatannotator.shadow.com.fasterxml.jackson.databind"
 
     classifier = null
-    dependencies {
-//        exclude(dependency('com.fasterxml.jackson.databind'))
-    }
 
     exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'module-info.class')
 }
