@@ -2,6 +2,7 @@ package com.harunabot.chatannotator.logger.server.json;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
@@ -23,7 +24,7 @@ public class GimmickLogJson
 	public GimmickLogJson(BlockPos gimmickPos, ResourceLocation gimmickName, boolean isActivated, EntityPlayer interactPlayer, Date interactTime)
 	{
 		this.interactTime = new SimpleDateFormat("HH:mm:ss").format(interactTime);
-		interactorId = interactPlayer.getUniqueID().toString();
+		interactorId = (Objects.nonNull(interactPlayer))? interactPlayer.getUniqueID().toString() : "null";
 
 		name = gimmickName.toString();
 

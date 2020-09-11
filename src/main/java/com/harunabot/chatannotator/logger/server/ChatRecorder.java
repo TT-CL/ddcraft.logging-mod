@@ -1,6 +1,7 @@
 package com.harunabot.chatannotator.logger.server;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import net.minecraft.util.math.Vec3d;
 public class ChatRecorder
 {
 	public static final String STATUS_DIR_NAME = "logs";
+	public static final String GIMMICK_FILE_NAME = "gimmickLog.json";
 
 	// TODO: チャットアノテーションとの紐付け
 	private Map<Integer, Map<UUID, Map<Integer, ChatStatusJson>>> dimensionChatStatuses = new HashMap<>();
@@ -30,6 +32,9 @@ public class ChatRecorder
 	{
 		dimensionChatStatuses.put(dimension, new HashMap<>());
 		gimmickLogs.put(dimension, new ArrayList<>());
+
+		File dimDir = ChatAnnotator.dimensionDirectories.get(dimension);
+		FileOutput.createFile(new File(dimDir, GIMMICK_FILE_NAME));
 	}
 
 	public void onDestroyDimension(int dimension)
@@ -65,7 +70,7 @@ public class ChatRecorder
 
 		 // Output
 		 File dimDir = ChatAnnotator.dimensionDirectories.get(dimension);
-		 File jsonFile = new File(dimDir, "gimmickLog.json");
+		 File jsonFile = new File(dimDir, GIMMICK_FILE_NAME);
 		 FileOutput.outputJson(jsonFile, dimLog);
 	}
 
