@@ -17,7 +17,7 @@ apply plugin: 'java'
 
 project.ext {
     major = "3"
-    minor = "0"
+    minor = "1"
     mcVersion = "1.12.2"
 }
 version = "${project.ext.mcVersion}-${project.ext.major}.${project.minor}"
