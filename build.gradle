@@ -21,7 +21,7 @@ project.ext {
     mcVersion = "1.12.2"
 }
 version = "${project.ext.mcVersion}-${project.ext.major}.${project.minor}"
-group = "com.harunabot.chatannotator" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = "jp.ac.titech.c.cl.chatannotator" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "chatannotator"
 
 sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
@@ -78,7 +78,7 @@ dependencies {
 shadowJar {
     configurations = [project.configurations.shadow]
 
-    relocate "com.fasterxml.jackson.databind", "com.harunabot.chatannotator.shadow.com.fasterxml.jackson.databind"
+    relocate "com.fasterxml.jackson.databind", "jp.ac.titech.c.cl.chatannotator.shadow.com.fasterxml.jackson.databind"
 
     classifier = null
 

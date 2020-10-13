@@ -2,6 +2,7 @@ package jp.ac.titech.c.cl.chatannotator.util.handlers.event;
 
 import jp.ac.titech.c.cl.chatannotator.common.config.AnnotationConfig;
 import jp.ac.titech.c.cl.chatannotator.network.ConfigMessage;
+import jp.ac.titech.c.cl.chatannotator.util.Reference;
 import jp.ac.titech.c.cl.chatannotator.util.handlers.ChatAnnotatorPacketHandler;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
@@ -36,7 +37,7 @@ public class ConfigSyncEventHandler
 	@SideOnly(Side.CLIENT)
 	public static void onConfigChangedEvent(ConfigChangedEvent event)
 	{
-		if (isConfigLocked && event.isCancelable())
+		if (isConfigLocked && event.isCancelable() && event.getModID().equals(Reference.MOD_ID))
 		{
 			event.setCanceled(true);
 		}

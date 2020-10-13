@@ -232,7 +232,6 @@ public class ChatEventHandler
 			// Create non-annotatable component
 			component = new TextComponentAnnotation(msg, DialogueAct.NO_ANNOTATION, senderId, dimension, numeralId);
 			component.annotateByReceiver(DialogueAct.NO_ANNOTATION);
-			System.out.println(component.toLogString());
 		}
 
 		// Take log

@@ -8,9 +8,9 @@ public class Reference {
 	private static final String MCVERSION = "@MC_VERSION@";
 	public static final String VERSION = MCVERSION + "-" + MAJOR + "." + MINOR;
 
-	public static final String CLIENT_PROXY_CLASS ="com.harunabot.chatannotator.proxy.ClientProxy";
-	public static final String SERVER_PROXY_CLASS ="com.harunabot.chatannotator.proxy.ServerProxy";
-	public static final String COMMON_PROXY_CLASS ="com.harunabot.chatannotator.proxy.CommonProxy";
+	public static final String CLIENT_PROXY_CLASS ="jp.ac.titech.c.cl.chatannotator.proxy.ClientProxy";
+	public static final String SERVER_PROXY_CLASS ="jp.ac.titech.c.cl.chatannotator.proxy.ServerProxy";
+	public static final String COMMON_PROXY_CLASS ="jp.ac.titech.c.cl.chatannotator.proxy.CommonProxy";
 
 	public static final int GUI_CHAT_ANNOTATOR = 0;
 }
