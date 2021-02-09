@@ -1,12 +1,13 @@
 package jp.ac.titech.c.cl.chatannotator.logger.server;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 import jp.ac.titech.c.cl.chatannotator.ChatAnnotator;
 import jp.ac.titech.c.cl.chatannotator.logger.server.json.ChatStatusJson;
@@ -42,7 +43,7 @@ public class ChatRecorder
 		gimmickLogs.remove(dimension);
 	}
 
-	public void recordChatStatus(EntityPlayer player, String serialId, BlockPos playerPos, Vec3d playerLook, BlockPos lookingBlockPos, String lookingBlockName)
+	public void recordChatStatus(EntityPlayer player, int chatId, BlockPos playerPos, Vec3d playerLook, @Nullable BlockPos partnerPos, @Nullable Vec3d partnerLook)
 	{
 		int dimension = player.dimension;
 		UUID uuid = player.getUniqueID();
@@ -54,8 +55,28 @@ public class ChatRecorder
 		}
 
 		 Map<Integer, ChatStatusJson> playerLogs = chatStatuses.get(uuid);
+		 playerLogs.put(chatId, new ChatStatusJson(chatId, new Date(), playerPos, playerLook, new BlockPos(0, 0, 0), ""));
+
+		 outputPlayerJson(player);
+	}
+
+	public void recordPlayerVision(EntityPlayer player, String serialId, BlockPos lookingBlockPos, String lookingBlockName)
+	{
+		int dimension = player.dimension;
+		UUID uuid = player.getUniqueID();
+		Map<UUID, Map<Integer, ChatStatusJson>> chatStatuses = dimensionChatStatuses.get(dimension);
+
+		if (!chatStatuses.containsKey(uuid))
+		{
+			return;
+		}
+
+		 Map<Integer, ChatStatusJson> playerLogs = chatStatuses.get(uuid);
 		 int chatId = ChatAnnotator.CHAT_ID_MANAGER_SERVER.getId(player, serialId);
-		 playerLogs.put(chatId, new ChatStatusJson(chatId, new Date(), playerPos, playerLook, lookingBlockPos, lookingBlockName));
+		 if (playerLogs.containsKey(chatId)) return;
+		 playerLogs.get(chatId).setLookingInfo(lookingBlockPos, lookingBlockName);
+		 // for debug
+		 System.out.println("uuid: " + uuid +"looking: " + playerLogs.get(chatId).lookingBlockName);
 
 		 outputPlayerJson(player);
 	}

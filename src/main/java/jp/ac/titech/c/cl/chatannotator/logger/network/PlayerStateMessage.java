@@ -18,10 +18,7 @@ public class PlayerStateMessage implements IMessage
 {
 	private String serialId;
 
-	private BlockPos playerPos;
-	// vector of where player is looking
-	private Vec3d playerLook;
-
+	// The block player is looking at
 	private BlockPos lookingAtPos;
 	private String lookingAtName;
 
@@ -36,9 +33,6 @@ public class PlayerStateMessage implements IMessage
 	{
 		this.serialId = serialId;
 
-		playerPos = player.getPosition();
-		playerLook = player.getLook(partialTicks);
-
 		lookingAtPos = player.rayTrace(100, partialTicks).getBlockPos();
 		IBlockState lookingBlockState = world.getBlockState(lookingAtPos);
 		lookingAtName = lookingBlockState.getBlock().getRegistryName().toString();
@@ -47,16 +41,6 @@ public class PlayerStateMessage implements IMessage
 	public String getSerialId()
 	{
 		return serialId;
-	}
-
-	public BlockPos getPlayerPos()
-	{
-		return playerPos;
-	}
-
-	public Vec3d getPlayerLook()
-	{
-		return playerLook;
 	}
 
 
@@ -75,8 +59,6 @@ public class PlayerStateMessage implements IMessage
 	public void fromBytes(ByteBuf buf)
 	{
 		serialId = ByteBufUtils.readUTF8String(buf);
-		playerPos = bytesToPos(buf);
-		playerLook = bytesToVec3d(buf);
 		lookingAtPos = bytesToPos(buf);
 		lookingAtName = ByteBufUtils.readUTF8String(buf);
 	}
@@ -85,14 +67,6 @@ public class PlayerStateMessage implements IMessage
 	public void toBytes(ByteBuf buf)
 	{
 		ByteBufUtils.writeUTF8String(buf, serialId);
-
-		buf.writeInt(playerPos.getX());
-		buf.writeInt(playerPos.getY());
-		buf.writeInt(playerPos.getZ());
-
-		buf.writeDouble(playerLook.x);
-		buf.writeDouble(playerLook.y);
-		buf.writeDouble(playerLook.z);
 
 		buf.writeInt(lookingAtPos.getX());
 		buf.writeInt(lookingAtPos.getY());
@@ -110,15 +84,4 @@ public class PlayerStateMessage implements IMessage
 
 		return new BlockPos(x, y, z);
 	}
-
-	private static Vec3d bytesToVec3d(ByteBuf buf)
-	{
-		double x,y,z;
-		x = buf.readDouble();
-		y = buf.readDouble();
-		z = buf.readDouble();
-
-		return new Vec3d(x, y, z);
-	}
-
 }

@@ -11,7 +11,7 @@ import com.google.common.collect.Lists;
 
 import jp.ac.titech.c.cl.chatannotator.ChatAnnotator;
 import jp.ac.titech.c.cl.chatannotator.annotator.DialogueAct;
-import jp.ac.titech.c.cl.chatannotator.common.config.AnnotationConfig;
+import jp.ac.titech.c.cl.chatannotator.common.config.ModConfig;
 import jp.ac.titech.c.cl.chatannotator.util.text.event.AnnotationClickEvent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
@@ -149,7 +149,7 @@ public class TextComponentAnnotation extends TextComponentString
     public void toProperStyle(UUID receiverId)
     {
     	// Sender -> default
-    	if(receiverId.toString().equals(senderId) || !AnnotationConfig.enableAnnotationLabel) {
+    	if(receiverId.toString().equals(senderId) || !ModConfig.enableAnnotationLabel) {
     		this.toDefaultStyle();
     		return;
     	}

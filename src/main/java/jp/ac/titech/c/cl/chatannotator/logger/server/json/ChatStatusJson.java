@@ -23,11 +23,11 @@ public class ChatStatusJson
 	public final double playerLookZ;
 
 	// BlockPos lookingAtPos;
-	public final int lookingBlockX;
-	public final int lookingBlockY;
-	public final int lookingBlockZ;
+	public int lookingBlockX;
+	public int lookingBlockY;
+	public int lookingBlockZ;
 
-	public final String lookingBlockName;
+	public String lookingBlockName;
 
 	public ChatStatusJson(
 			int chatId, /*String chatMessage,*/ Date chatTime,
@@ -45,6 +45,15 @@ public class ChatStatusJson
 		playerLookY = playerLook.y;
 		playerLookZ = playerLook.z;
 
+		lookingBlockX = lookingBlockPos.getX();
+		lookingBlockY = lookingBlockPos.getY();
+		lookingBlockZ = lookingBlockPos.getZ();
+
+		this.lookingBlockName = lookingBlockName;
+	}
+
+	public void setLookingInfo(BlockPos lookingBlockPos, String lookingBlockName)
+	{
 		lookingBlockX = lookingBlockPos.getX();
 		lookingBlockY = lookingBlockPos.getY();
 		lookingBlockZ = lookingBlockPos.getZ();

@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Level;
 import jp.ac.titech.c.cl.chatannotator.ChatAnnotator;
 import jp.ac.titech.c.cl.chatannotator.annotator.client.gui.AlterGuiNewChat;
 import jp.ac.titech.c.cl.chatannotator.annotator.client.gui.GuiChatWithAnnotation;
-import jp.ac.titech.c.cl.chatannotator.common.config.AnnotationConfig;
+import jp.ac.titech.c.cl.chatannotator.common.config.ModConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiIngame;
@@ -28,7 +28,7 @@ public class ClientEventHandler
 	@SubscribeEvent
 	public static void onGuiOpen(GuiOpenEvent event)
 	{
-		if (!AnnotationConfig.enableAnnotationLabel) return;
+		if (!ModConfig.enableAnnotationLabel) return;
 		if (event.getGui() == null) return;
 
 		// replace Chat GUI

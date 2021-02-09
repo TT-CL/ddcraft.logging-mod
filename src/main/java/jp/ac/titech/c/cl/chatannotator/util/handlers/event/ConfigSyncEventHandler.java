@@ -1,6 +1,6 @@
 package jp.ac.titech.c.cl.chatannotator.util.handlers.event;
 
-import jp.ac.titech.c.cl.chatannotator.common.config.AnnotationConfig;
+import jp.ac.titech.c.cl.chatannotator.common.config.ModConfig;
 import jp.ac.titech.c.cl.chatannotator.network.ConfigMessage;
 import jp.ac.titech.c.cl.chatannotator.util.Reference;
 import jp.ac.titech.c.cl.chatannotator.util.handlers.ChatAnnotatorPacketHandler;
@@ -27,7 +27,7 @@ public class ConfigSyncEventHandler
 		if (!(event.player instanceof EntityPlayerMP)) return;
 
 		EntityPlayerMP player = (EntityPlayerMP)event.player;
-		ChatAnnotatorPacketHandler.sendToClient(new ConfigMessage(AnnotationConfig.enableAnnotationLabel), player);
+		ChatAnnotatorPacketHandler.sendToClient(new ConfigMessage(ModConfig.enableAnnotationLabel), player);
 	}
 
 	/*

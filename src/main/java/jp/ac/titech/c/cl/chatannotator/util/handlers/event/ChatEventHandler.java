@@ -1,5 +1,6 @@
 package jp.ac.titech.c.cl.chatannotator.util.handlers.event;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -7,7 +8,7 @@ import org.apache.logging.log4j.Level;
 
 import jp.ac.titech.c.cl.chatannotator.ChatAnnotator;
 import jp.ac.titech.c.cl.chatannotator.annotator.DialogueAct;
-import jp.ac.titech.c.cl.chatannotator.common.config.AnnotationConfig;
+import jp.ac.titech.c.cl.chatannotator.common.config.ModConfig;
 import jp.ac.titech.c.cl.chatannotator.logger.network.PlayerStateMessage;
 import jp.ac.titech.c.cl.chatannotator.network.ChatIdMessage;
 import jp.ac.titech.c.cl.chatannotator.screenshot.ScreenRecorder;
@@ -17,6 +18,8 @@ import jp.ac.titech.c.cl.chatannotator.util.text.TextComponentAnnotation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -54,13 +57,45 @@ public class ChatEventHandler
 		EntityPlayerMP player = event.getPlayer();
 		UUID senderId = player.getUniqueID();
 		int dimension = player.dimension;
+		BlockPos playerPos = player.getPosition();
+		Vec3d playerLook = player.getLookVec();
 
+		// Receiver's info (instant world only)
+		BlockPos partnerPos = null;
+		Vec3d partnerLook = null;
+		if (dimension >= 100)
+		{
+			List<EntityPlayer> players = player.getServerWorld().playerEntities;
+			if (players.size() == 2) //something wrong if not 2
+			{
+				for (EntityPlayer partner : players)
+				{
+					if (partner.getUniqueID() == senderId) continue;
+
+					partnerPos = partner.getPosition();
+					partnerLook = partner.getLookVec();
+					break;
+				}
+			}
+		}
+
+		// Take log
 		String msg = elements.msgComponent.getText();
 		int numeralId = ChatAnnotator.CHAT_ID_MANAGER_SERVER.getIdOnServerChat(msg, player);
+		ChatAnnotator.CHAT_RECORDER.recordChatStatus(
+				player,
+				numeralId,
+				playerPos, playerLook,
+				partnerPos, partnerLook
+		);
 
-		// Replace Chat
-		ITextComponent newComponent = createAnnotatedServerChat((TextComponentTranslation) component, elements, senderId, dimension, numeralId);
-		event.setComponent(newComponent);
+		// Replace chat component if client side is modded
+		if (!ModConfig.serverOnlyMode)
+		{
+			// Replace Chat
+			ITextComponent newComponent = createAnnotatedServerChat((TextComponentTranslation) component, elements, senderId, dimension, numeralId);
+			event.setComponent(newComponent);
+		}
 	}
 
 	/**
@@ -211,7 +246,7 @@ public class ChatEventHandler
 		String msg = separatedMsg.getRight();
 
 		TextComponentAnnotation component;
-		if (AnnotationConfig.enableAnnotationLabel && !annotationIdString.isEmpty())
+		if (ModConfig.enableAnnotationLabel && !annotationIdString.isEmpty())
 		{
 			// Create annotatable component
 			int annotationId = Integer.parseInt(annotationIdString);

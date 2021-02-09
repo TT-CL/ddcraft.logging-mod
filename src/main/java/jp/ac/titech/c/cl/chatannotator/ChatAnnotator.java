@@ -26,7 +26,13 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-@Mod(modid = Reference.MOD_ID, name= Reference.NAME, version = Reference.VERSION)
+@Mod(
+		modid = Reference.MOD_ID,
+		name= Reference.NAME,
+		version = Reference.VERSION,
+		acceptableRemoteVersions = "*",
+		acceptedMinecraftVersions = "[1.12,1.13)"
+	)
 public class ChatAnnotator
 {
 	@Instance
