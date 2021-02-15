@@ -33,7 +33,6 @@ public class TextComponentAnnotation extends TextComponentString
 
 	private final int PARAM_NUM = 7;
 
-	// FIXME: should contain sendername?
     public TextComponentAnnotation(String msg, DialogueAct senderAnnotation, UUID senderId, int dimension, int numeralId)
     {
     	this(msg,senderAnnotation, null, senderId.toString(), new SimpleDateFormat("HH:mm:ss").format(new Date()), dimension, numeralId);
@@ -50,6 +49,32 @@ public class TextComponentAnnotation extends TextComponentString
     	this.fullMsg = msg;
     	this.dimension = dimension;
     	this.numeralId = numeralId;
+    }
+
+    /**
+     * Check if TextComponentAnnotation can be recreated from component
+     * @param component
+     * @return
+     */
+    public static boolean isInterpretable(TextComponentString component)
+    {
+    	try
+    	{
+	    	List<ITextComponent> siblings = component.getSiblings();
+	    	DialogueAct senderAnnotation = DialogueAct.convertFromName(siblings.get(0).getUnformattedText());
+	    	DialogueAct receiverAnnotation = DialogueAct.convertFromName(siblings.get(1).getUnformattedText());
+	    	String senderId = siblings.get(2).getUnformattedText();
+	    	String time = siblings.get(3).getUnformattedText();
+	    	String fullMsg = siblings.get(4).getUnformattedText();
+	    	int dimension = Integer.parseInt(siblings.get(5).getUnformattedText());
+	    	int numeralId = Integer.parseInt(siblings.get(6).getUnformattedText());
+    	}
+    	catch (Exception e)
+    	{
+    		return false;
+    	}
+
+    	return true;
     }
 
     // Recreate from TextComponentString

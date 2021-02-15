@@ -15,6 +15,7 @@ import net.minecraft.entity.player.EntityPlayer;
 // Manages and converts serialId to numeral id for each player&dimension
 public class ChatIdManagerServer
 {
+	private static final String DUMMY_ID_PREFIX = "dummy";
 
 	// dimension -> player uuid -> serial id -> numeral id
 	private Map<Integer, Map<UUID, Map<String, Integer>>> dimensionChatIds;
@@ -67,7 +68,7 @@ public class ChatIdManagerServer
 		Map<String, Queue<String>> playerNotifiedChats = findOrCreatePlayerNotifiedChats(player);
 		String serialId = getNotifiedChatId(message, playerNotifiedChats);
 
-		if (Objects.isNull(serialId)) // && ModConfig.serverSideOnly
+		if (Objects.isNull(serialId))
 		{
 			// Client side not modded: Serial id hasn't notified by ChatIdMessage.
 			Map<String, Integer> playerChats = findOrCreatePlayerChatIds(player);
@@ -75,7 +76,6 @@ public class ChatIdManagerServer
 
 			// Register dummy serial id instead
 			serialId = DUMMY_ID_PREFIX + Integer.toString(numeralId);
-			//putNotifiedChatMapping(message, serialId, playerNotifiedChats);
 		}
 		else
 		{
