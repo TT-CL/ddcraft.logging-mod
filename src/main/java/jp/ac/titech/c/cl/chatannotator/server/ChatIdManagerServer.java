@@ -50,27 +50,6 @@ public class ChatIdManagerServer
 	{
 		Map<String, Queue<String>> playerNotifiedChats = findOrCreatePlayerNotifiedChats(player);
 
-		/*
-		// message already registered
-		if (playerNotifiedChats.containsKey(msg))
-		{
-			String existingId = getNotifiedChatId(msg, playerNotifiedChats);
-
-			if (existingId.startsWith(DUMMY_ID_PREFIX)) {
-				// Arrived after ServerChatEvent (Should not happen)
-				// Re-register real id
-				Map<String, Integer> playerChats = findOrCreatePlayerChatIds(player);
-				int numeralId = Integer.parseInt(existingId.substring(DUMMY_ID_PREFIX.length()));
-				playerChats.put(serialId, numeralId);
-				removeNotifiedChatMapping(msg, playerNotifiedChats);
-
-				return;
-			} else {
-				// client repeated same message. Process normally
-			}
-		}
-		*/
-
 		// register message
 		putNotifiedChatMapping(msg, serialId, playerNotifiedChats);
 

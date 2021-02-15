@@ -7,22 +7,24 @@ import java.util.Map;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 
-import jp.ac.titech.c.cl.chatannotator.annotator.server.AnnotationLog;
 import jp.ac.titech.c.cl.chatannotator.annotator.server.AnnotationRecorder;
 import jp.ac.titech.c.cl.chatannotator.client.ChatIdManagerClient;
 import jp.ac.titech.c.cl.chatannotator.logger.server.ChatRecorder;
 import jp.ac.titech.c.cl.chatannotator.proxy.CommonProxy;
 import jp.ac.titech.c.cl.chatannotator.screenshot.ScreenRecorder;
+import jp.ac.titech.c.cl.chatannotator.server.AlterDedicatedPlayerList;
 import jp.ac.titech.c.cl.chatannotator.server.ChatIdManagerServer;
 import jp.ac.titech.c.cl.chatannotator.util.Reference;
 import jp.ac.titech.c.cl.chatannotator.util.handlers.ChatAnnotatorPacketHandler;
-import net.minecraft.client.Minecraft;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -84,4 +86,16 @@ public class ChatAnnotator
 		proxy.postInit(event);
 	}
 
+	@SideOnly(Side.SERVER)
+	@Mod.EventHandler
+	public static void onServerAboutToStart(FMLServerAboutToStartEvent event)
+	{
+		MinecraftServer server = event.getServer();
+		if (!(server instanceof DedicatedServer)) return;
+
+		DedicatedServer dedicatedServer = (DedicatedServer) server;
+		server.setPlayerList(new AlterDedicatedPlayerList(dedicatedServer));
+
+		ChatAnnotator.LOGGER.log(Level.INFO, "Replaced Server PlayerList: " + server.getPlayerList().toString());
+	}
 }

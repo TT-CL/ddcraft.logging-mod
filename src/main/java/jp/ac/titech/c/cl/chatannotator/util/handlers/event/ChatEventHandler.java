@@ -85,17 +85,20 @@ public class ChatEventHandler
 		ChatAnnotator.CHAT_RECORDER.recordChatStatus(
 				player,
 				numeralId,
+				msg,
 				playerPos, playerLook,
 				partnerPos, partnerLook
 		);
 
 		// Replace chat component if client side is modded
-		if (!ModConfig.serverOnlyMode)
-		{
+
+		//if (!ModConfig.serverOnlyMode)
+		//{
 			// Replace Chat
 			ITextComponent newComponent = createAnnotatedServerChat((TextComponentTranslation) component, elements, senderId, dimension, numeralId);
 			event.setComponent(newComponent);
-		}
+		//}
+
 	}
 
 	/**
@@ -154,7 +157,7 @@ public class ChatEventHandler
 	 * Set the proper style, make chat from other dimension invisible
 	 * @param event
 	 */
-	@SubscribeEvent
+	//@SubscribeEvent
 	@SideOnly(Side.CLIENT)
 	public static void onReceivedClientChat(ClientChatReceivedEvent event)
 	{
@@ -193,6 +196,32 @@ public class ChatEventHandler
 	/** =================
 	 *    UTILS
 	 * ================== */
+
+	public static int getChatDimension(ITextComponent icomponent)
+	{
+		int ERROR_DIM = -10;
+
+		System.out.println("getChatDimension");
+		System.out.println("component: " + icomponent.toString());
+		if(!(icomponent instanceof TextComponentTranslation)) return -ERROR_DIM;
+		TextComponentTranslation component = (TextComponentTranslation) icomponent;
+		// Pass non-chat message
+		if(!component.getKey().equals(CHAT_KEY)) return ERROR_DIM;
+
+		// Find Message Component
+		Object[] args = component.getFormatArgs();
+		TextComponentString msgComponentString = findMsgComponent(args);
+		System.out.println("componentstring: " + msgComponentString.toString());
+
+		// Convert to TextComponentAnnotation
+		TextComponentAnnotation msgComponent = new TextComponentAnnotation(msgComponentString);
+		if(msgComponent.getTime().equals("")) return ERROR_DIM;
+
+		// Check Dimension
+		int messageDim = msgComponent.getDimension();
+
+		return messageDim;
+	}
 
 	private static boolean isChatTranslationComponent(ITextComponent comp)
 	{

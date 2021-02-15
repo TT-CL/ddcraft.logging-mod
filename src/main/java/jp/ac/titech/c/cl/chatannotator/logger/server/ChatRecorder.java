@@ -43,7 +43,8 @@ public class ChatRecorder
 		gimmickLogs.remove(dimension);
 	}
 
-	public void recordChatStatus(EntityPlayer player, int chatId, BlockPos playerPos, Vec3d playerLook, @Nullable BlockPos partnerPos, @Nullable Vec3d partnerLook)
+	// save ChatStatusJson to dimensionChatStatuses based on server-received chat
+	public void recordChatStatus(EntityPlayer player, int chatId, String chatMsg, BlockPos playerPos, Vec3d playerLook, @Nullable BlockPos partnerPos, @Nullable Vec3d partnerLook)
 	{
 		int dimension = player.dimension;
 		UUID uuid = player.getUniqueID();
@@ -54,8 +55,16 @@ public class ChatRecorder
 			chatStatuses.put(uuid, new HashMap<>());
 		}
 
-		 Map<Integer, ChatStatusJson> playerLogs = chatStatuses.get(uuid);
-		 playerLogs.put(chatId, new ChatStatusJson(chatId, new Date(), playerPos, playerLook, new BlockPos(0, 0, 0), ""));
+		Map<Integer, ChatStatusJson> playerLogs = chatStatuses.get(uuid);
+		if (playerLogs.containsKey(chatId))
+		{
+			// Already created by other message
+			playerLogs.get(chatId).setMessageAndPositionInfo(chatMsg, new Date(), playerPos, playerLook, partnerPos, partnerLook);
+		}
+		else
+		{
+			playerLogs.put(chatId, new ChatStatusJson(chatId, chatMsg, new Date(), playerPos, playerLook, partnerPos, partnerLook));
+		}
 
 		 outputPlayerJson(player);
 	}
@@ -73,10 +82,14 @@ public class ChatRecorder
 
 		 Map<Integer, ChatStatusJson> playerLogs = chatStatuses.get(uuid);
 		 int chatId = ChatAnnotator.CHAT_ID_MANAGER_SERVER.getId(player, serialId);
-		 if (playerLogs.containsKey(chatId)) return;
-		 playerLogs.get(chatId).setLookingInfo(lookingBlockPos, lookingBlockName);
-		 // for debug
-		 System.out.println("uuid: " + uuid +"looking: " + playerLogs.get(chatId).lookingBlockName);
+		 if (playerLogs.containsKey(chatId))
+		 {
+			 playerLogs.get(chatId).setLookingInfo(lookingBlockPos, lookingBlockName);
+		 }
+		 else
+		 {
+			 playerLogs.put(chatId, new ChatStatusJson(chatId, lookingBlockPos, lookingBlockName));
+		 }
 
 		 outputPlayerJson(player);
 	}
