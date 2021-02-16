@@ -22,10 +22,11 @@ public class HandlerConfigMessage implements IMessageHandler<ConfigMessage, IMes
 			@Override
 			public void run()
 			{
-				ModConfig.enableAnnotationLabel = message.isAnnotationEnabled();
+				ModConfig.serverOnlyMode = false;
+				ModConfig.clientOption.enableAnnotationLabel = message.isAnnotationEnabled();
 				ConfigSyncEventHandler.lockConfig();
 
-				String status = (ModConfig.enableAnnotationLabel) ? "enabled" : "disabled";
+				String status = (ModConfig.clientOption.enableAnnotationLabel) ? "enabled" : "disabled";
 				ChatAnnotator.LOGGER.log(Level.INFO, "Config overwritten by server: annotation " + status);
 			}
 		});

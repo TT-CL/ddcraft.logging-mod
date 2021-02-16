@@ -28,7 +28,7 @@ public class ClientEventHandler
 	@SubscribeEvent
 	public static void onGuiOpen(GuiOpenEvent event)
 	{
-		if (!ModConfig.enableAnnotationLabel) return;
+		if (!ModConfig.clientOption.enableAnnotationLabel) return;
 		if (event.getGui() == null) return;
 
 		// replace Chat GUI

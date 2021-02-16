@@ -174,7 +174,7 @@ public class TextComponentAnnotation extends TextComponentString
     public void toProperStyle(UUID receiverId)
     {
     	// Sender -> default
-    	if(receiverId.toString().equals(senderId) || !ModConfig.enableAnnotationLabel) {
+    	if(receiverId.toString().equals(senderId) || !ModConfig.isAnnotationEnabled()) {
     		this.toDefaultStyle();
     		return;
     	}

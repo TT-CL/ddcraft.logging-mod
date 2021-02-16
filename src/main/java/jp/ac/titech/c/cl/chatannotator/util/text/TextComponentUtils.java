@@ -31,7 +31,7 @@ public class TextComponentUtils
 		String msg = separatedMsg.getRight();
 
 		TextComponentAnnotation component;
-		if (ModConfig.enableAnnotationLabel && !annotationIdString.isEmpty())
+		if (ModConfig.isAnnotationEnabled() && !annotationIdString.isEmpty())
 		{
 			// Create annotatable component
 			int annotationId = Integer.parseInt(annotationIdString);

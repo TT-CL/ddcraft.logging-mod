@@ -34,7 +34,7 @@ public class AlterDedicatedPlayerList extends DedicatedPlayerList
 		if (Objects.nonNull(convertedComponent))
 		{
 			messageDim = convertedComponent.getDimension();
-			if (ModConfig.serverOnlyMode || !ModConfig.enableAnnotationLabel)
+			if (!ModConfig.isAnnotationEnabled())
 			{
 				// change to normal text component
 				if (component instanceof TextComponentTranslation)
