@@ -23,7 +23,6 @@ public class ChatRecorder
 	public static final String STATUS_DIR_NAME = "logs";
 	public static final String GIMMICK_FILE_NAME = "gimmickLog.json";
 
-	// TODO: チャットアノテーションとの紐付け
 	private Map<Integer, Map<UUID, Map<Integer, ChatStatusJson>>> dimensionChatStatuses = new HashMap<>();
 
 	private Map<Integer, ArrayList<GimmickLogJson>> gimmickLogs = new HashMap<>();

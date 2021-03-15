@@ -10,7 +10,7 @@ import net.minecraft.util.math.Vec3d;
 public class ChatStatusJson
 {
 	public final int chatId;
-	public String chatMessage;
+	public String text;
 	public String chatTime;
 
 	// BlockPos playerPos;
@@ -41,11 +41,11 @@ public class ChatStatusJson
 	public String lookingBlockName = "";
 
 	public ChatStatusJson(
-			int chatId, String chatMessage, Date chatTime,
+			int chatId, String text, Date chatTime,
 			BlockPos playerPos, Vec3d playerLook, BlockPos partnerPos, Vec3d partnerLook)
 	{
 		this.chatId = chatId;
-		this.chatMessage = chatMessage;
+		this.text = text;
 		this.chatTime =  new SimpleDateFormat("HH:mm:ss").format(chatTime);
 
 		playerX = playerPos.getX();
@@ -83,7 +83,7 @@ public class ChatStatusJson
 	public void setMessageAndPositionInfo(String chatMessage, Date chatTime,
 			BlockPos playerPos, Vec3d playerLook, BlockPos partnerPos, Vec3d partnerLook)
 	{
-		this.chatMessage = chatMessage;
+		this.text = chatMessage;
 		this.chatTime =  new SimpleDateFormat("HH:mm:ss").format(chatTime);
 
 		playerX = playerPos.getX();
