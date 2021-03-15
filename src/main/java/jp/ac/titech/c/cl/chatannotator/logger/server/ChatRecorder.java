@@ -1,12 +1,13 @@
 package jp.ac.titech.c.cl.chatannotator.logger.server;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 import jp.ac.titech.c.cl.chatannotator.ChatAnnotator;
 import jp.ac.titech.c.cl.chatannotator.logger.server.json.ChatStatusJson;
@@ -22,7 +23,6 @@ public class ChatRecorder
 	public static final String STATUS_DIR_NAME = "logs";
 	public static final String GIMMICK_FILE_NAME = "gimmickLog.json";
 
-	// TODO: チャットアノテーションとの紐付け
 	private Map<Integer, Map<UUID, Map<Integer, ChatStatusJson>>> dimensionChatStatuses = new HashMap<>();
 
 	private Map<Integer, ArrayList<GimmickLogJson>> gimmickLogs = new HashMap<>();
@@ -42,7 +42,8 @@ public class ChatRecorder
 		gimmickLogs.remove(dimension);
 	}
 
-	public void recordChatStatus(EntityPlayer player, String serialId, BlockPos playerPos, Vec3d playerLook, BlockPos lookingBlockPos, String lookingBlockName)
+	// save ChatStatusJson to dimensionChatStatuses based on server-received chat
+	public void recordChatStatus(EntityPlayer player, int chatId, String chatMsg, BlockPos playerPos, Vec3d playerLook, @Nullable BlockPos partnerPos, @Nullable Vec3d partnerLook)
 	{
 		int dimension = player.dimension;
 		UUID uuid = player.getUniqueID();
@@ -53,9 +54,41 @@ public class ChatRecorder
 			chatStatuses.put(uuid, new HashMap<>());
 		}
 
+		Map<Integer, ChatStatusJson> playerLogs = chatStatuses.get(uuid);
+		if (playerLogs.containsKey(chatId))
+		{
+			// Already created by other message
+			playerLogs.get(chatId).setMessageAndPositionInfo(chatMsg, new Date(), playerPos, playerLook, partnerPos, partnerLook);
+		}
+		else
+		{
+			playerLogs.put(chatId, new ChatStatusJson(chatId, chatMsg, new Date(), playerPos, playerLook, partnerPos, partnerLook));
+		}
+
+		 outputPlayerJson(player);
+	}
+
+	public void recordPlayerVision(EntityPlayer player, String serialId, BlockPos lookingBlockPos, String lookingBlockName)
+	{
+		int dimension = player.dimension;
+		UUID uuid = player.getUniqueID();
+		Map<UUID, Map<Integer, ChatStatusJson>> chatStatuses = dimensionChatStatuses.get(dimension);
+
+		if (!chatStatuses.containsKey(uuid))
+		{
+			return;
+		}
+
 		 Map<Integer, ChatStatusJson> playerLogs = chatStatuses.get(uuid);
 		 int chatId = ChatAnnotator.CHAT_ID_MANAGER_SERVER.getId(player, serialId);
-		 playerLogs.put(chatId, new ChatStatusJson(chatId, new Date(), playerPos, playerLook, lookingBlockPos, lookingBlockName));
+		 if (playerLogs.containsKey(chatId))
+		 {
+			 playerLogs.get(chatId).setLookingInfo(lookingBlockPos, lookingBlockName);
+		 }
+		 else
+		 {
+			 playerLogs.put(chatId, new ChatStatusJson(chatId, lookingBlockPos, lookingBlockName));
+		 }
 
 		 outputPlayerJson(player);
 	}
