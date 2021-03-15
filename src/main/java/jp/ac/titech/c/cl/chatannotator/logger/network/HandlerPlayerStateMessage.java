@@ -18,11 +18,9 @@ public class HandlerPlayerStateMessage implements IMessageHandler<PlayerStateMes
 	{
 		EntityPlayerMP player = ctx.getServerHandler().player;
 
-		ChatAnnotator.CHAT_RECORDER.recordChatStatus(
+		ChatAnnotator.CHAT_RECORDER.recordPlayerVision(
 				player,
 				message.getSerialId(),
-				message.getPlayerPos(),
-				message.getPlayerLook(),
 				message.getLookingAtPos(),
 				message.getLookingAtName());
 

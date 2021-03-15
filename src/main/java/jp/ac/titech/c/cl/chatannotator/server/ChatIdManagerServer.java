@@ -1,9 +1,13 @@
 package jp.ac.titech.c.cl.chatannotator.server;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 import jp.ac.titech.c.cl.chatannotator.network.ChatIdMessage;
 import net.minecraft.entity.player.EntityPlayer;
@@ -11,10 +15,12 @@ import net.minecraft.entity.player.EntityPlayer;
 // Manages and converts serialId to numeral id for each player&dimension
 public class ChatIdManagerServer
 {
-	private Map<Integer, Map<UUID, Map<String, Integer>>> dimensionChatIds;
+	private static final String DUMMY_ID_PREFIX = "dummy";
 
+	// dimension -> player uuid -> serial id -> numeral id
+	private Map<Integer, Map<UUID, Map<String, Integer>>> dimensionChatIds;
 	// chats notified by ChatIdMessage but not yet captured by ServerChatEvent
-	private Map<Integer, Map<UUID, Map<String, String>>> notifiedChatsToSerial;
+	private Map<Integer, Map<UUID, Map<String, Queue<String>>>> notifiedChatsToSerial;
 
 	public ChatIdManagerServer()
 	{
@@ -43,28 +49,15 @@ public class ChatIdManagerServer
 	// For HandlerChatIdMessage: connect full message & serialId
 	public void processChatIdMessage(String serialId, String msg, EntityPlayer player)
 	{
-		Map<String, String> playerNotifiedChats = findOrCreatePlayerNotifiedChats(player);
-
-		// message already exists -> something wrong?  no registration and return
-		if (playerNotifiedChats.containsKey(msg))
-		{
-			String id = playerNotifiedChats.get(msg);
-
-			if (id == "") {
-				// Arrived after ServerChatEvent maybe?
-			} else {
-				// repeated same chats
-			}
-			return;
-		}
+		Map<String, Queue<String>> playerNotifiedChats = findOrCreatePlayerNotifiedChats(player);
 
 		// register message
-		playerNotifiedChats.put(msg, serialId);
+		putNotifiedChatMapping(msg, serialId, playerNotifiedChats);
 
 		return;
 	}
 
-	// For ChatEventHandler: gets numeral Id from
+	// For ChatEventHandler: fix numeral id for the message
 	public int getIdOnServerChat(String message, EntityPlayer player)
 	{
 		// shorten message to match ChatIdMessage
@@ -72,21 +65,27 @@ public class ChatIdManagerServer
 			message = message.substring(0, ChatIdMessage.MAX_MESSAGE_LENGTH);
 		}
 
-		Map<String, String> playerChats = findOrCreatePlayerNotifiedChats(player);
-		String serialId = playerChats.get(message);
+		Map<String, Queue<String>> playerNotifiedChats = findOrCreatePlayerNotifiedChats(player);
+		String serialId = getNotifiedChatId(message, playerNotifiedChats);
 
 		if (Objects.isNull(serialId))
 		{
-			// Called before ChatIdPakcet maybe? return next numeral Id for the player
-			playerChats.put(message, "");
-			Map<String, Integer> arrivedChats = findOrCreatePlayerChatIds(player);
-			return arrivedChats.size();
+			// Client side not modded: Serial id hasn't notified by ChatIdMessage.
+			Map<String, Integer> playerChats = findOrCreatePlayerChatIds(player);
+			int numeralId = playerChats.size();
+
+			// Register dummy serial id instead
+			serialId = DUMMY_ID_PREFIX + Integer.toString(numeralId);
+		}
+		else
+		{
+			// Unregister notified message if exist
+			removeNotifiedChatMapping(message, playerNotifiedChats);
 		}
 
-		int id = getId(player, serialId);
-		playerChats.remove(message);
-
-		return id;
+		// Fix numeral id
+		int numeralId = getId(player, serialId);
+		return numeralId;
 	}
 
 	public void onCreateDimension(int dimension)
@@ -101,7 +100,7 @@ public class ChatIdManagerServer
 		notifiedChatsToSerial.remove(dimension);
 	}
 
-	// get appropriate map from dimensionChatIds;
+	// get appropriate map from dimensionChatIds
 	private Map<String, Integer> findOrCreatePlayerChatIds(EntityPlayer player)
 	{
 		int dimension = player.dimension;
@@ -121,16 +120,16 @@ public class ChatIdManagerServer
 	}
 
 	// get appropriate map from notifiedChatsToSerial
-	private Map<String, String> findOrCreatePlayerNotifiedChats(EntityPlayer player)
+	private Map<String, Queue<String>> findOrCreatePlayerNotifiedChats(EntityPlayer player)
 	{
 		int dimension = player.dimension;
 		UUID uuid = player.getUniqueID();
-		Map<UUID, Map<String, String>> dimensionChats = notifiedChatsToSerial.get(dimension);
+		Map<UUID, Map<String, Queue<String>>> dimensionChats = notifiedChatsToSerial.get(dimension);
 
 		// Player's first chat in the world
 		if (!dimensionChats.containsKey(uuid))
 		{
-			Map<String, String> playerChats = new HashMap<>();
+			Map<String, Queue<String>> playerChats = new HashMap<>();
 			dimensionChats.put(uuid, playerChats);
 
 			return playerChats;
@@ -138,4 +137,42 @@ public class ChatIdManagerServer
 
 		return dimensionChats.get(uuid);
 	}
+
+	// put new message->serialId mapping to notifiedChatSerial
+	private static void putNotifiedChatMapping(String msg, String serialId, Map<String, Queue<String>> playerChats)
+	{
+		Queue<String> idList = playerChats.get(msg);
+		if(Objects.isNull(idList))
+		{
+			idList = new LinkedList<>();
+			playerChats.put(msg, idList);
+		}
+
+		idList.add(serialId);
+	}
+
+	// remove first mapping from notifiedChatSerial
+	private static void removeNotifiedChatMapping(String msg, Map<String, Queue<String>> playerChats)
+	{
+		Queue<String> idList = playerChats.get(msg);
+		if(Objects.isNull(idList)) return;
+
+		idList.poll();
+		if(idList.isEmpty())
+		{
+			// delete the list if there's no more mapping
+			playerChats.remove(msg);
+		}
+	}
+
+	// get first serial id mapped from the message
+	@Nullable
+	private static String getNotifiedChatId(String msg, Map<String, Queue<String>> playerChats)
+	{
+		Queue<String> idList = playerChats.get(msg);
+		if(Objects.isNull(idList)) return null;
+
+		return idList.peek();
+	}
+
 }

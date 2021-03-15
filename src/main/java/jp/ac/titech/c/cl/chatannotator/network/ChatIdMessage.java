@@ -10,7 +10,7 @@ public class ChatIdMessage implements IMessage
 {
 	public static final int MAX_MESSAGE_LENGTH = 20;
 
-	String serialId = "hoge";
+	String serialId = "";
 	String message;
 
 	public ChatIdMessage()

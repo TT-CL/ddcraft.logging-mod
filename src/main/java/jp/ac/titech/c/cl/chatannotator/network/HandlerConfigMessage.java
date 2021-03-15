@@ -3,7 +3,7 @@ package jp.ac.titech.c.cl.chatannotator.network;
 import org.apache.logging.log4j.Level;
 
 import jp.ac.titech.c.cl.chatannotator.ChatAnnotator;
-import jp.ac.titech.c.cl.chatannotator.common.config.AnnotationConfig;
+import jp.ac.titech.c.cl.chatannotator.common.config.ModConfig;
 import jp.ac.titech.c.cl.chatannotator.util.handlers.event.ConfigSyncEventHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -22,10 +22,11 @@ public class HandlerConfigMessage implements IMessageHandler<ConfigMessage, IMes
 			@Override
 			public void run()
 			{
-				AnnotationConfig.enableAnnotationLabel = message.isAnnotationEnabled();
+				ModConfig.serverOnlyMode = false;
+				ModConfig.clientOption.enableAnnotationLabel = message.isAnnotationEnabled();
 				ConfigSyncEventHandler.lockConfig();
 
-				String status = (AnnotationConfig.enableAnnotationLabel) ? "enabled" : "disabled";
+				String status = (ModConfig.clientOption.enableAnnotationLabel) ? "enabled" : "disabled";
 				ChatAnnotator.LOGGER.log(Level.INFO, "Config overwritten by server: annotation " + status);
 			}
 		});
