@@ -40,7 +40,7 @@ public class ConfigSyncEventHandler
 			// Vanilla: kick if serverOnlyMode is off. No packet
 			if (!ModConfig.serverOnlyMode)
 			{
-				String message = "Tried to connect with vanilla client.";
+				String message = "You need to install ChatAnnotatorMod to connect to this server.";
 		        TextComponentString msgComponent = new TextComponentString(message);
 				player.connection.disconnect(msgComponent);
 			}

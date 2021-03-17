@@ -41,7 +41,6 @@ class AlterGuiUtilRenderComponents extends GuiUtilRenderComponents
                 String s1 = s.substring(k + 1);
                 s = s.substring(0, k + 1);
                 ITextComponent itextcomponent2 = createPartComponent(s1, itextcomponent1);
-                System.out.println(itextcomponent2);
                 list1.add(j + 1, itextcomponent2);
                 flag = true;
             }

@@ -2,9 +2,9 @@ package jp.ac.titech.c.cl.chatannotator.util;
 
 public class Reference {
 	public static final String MOD_ID = "chatannotator";
-	public static final String NAME = "Chat Annotator Mod";
+	public static final String NAME = "DDCraft: ChatAnnotator Mod";
 	private static final String MAJOR     = "4";
-	private static final String MINOR     = "0";
+	private static final String MINOR     = "1";
 	private static final String MCVERSION = "1.12.2";
 	public static final String VERSION = MCVERSION + "-" + MAJOR + "." + MINOR;
 
